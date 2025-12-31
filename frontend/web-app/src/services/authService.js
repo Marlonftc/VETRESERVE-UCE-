@@ -1,14 +1,12 @@
-const API_URL = "http://127.0.0.1:8000";
-
 export async function loginRequest(email, password) {
   const body = new URLSearchParams();
   body.append("username", email);
   body.append("password", password);
 
-  const res = await fetch(`${API_URL}/auth/login`, {
+  const res = await fetch("http://127.0.0.1:8000/auth/login", {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body
+    body,
   });
 
   if (!res.ok) {
@@ -20,13 +18,12 @@ export async function loginRequest(email, password) {
 }
 
 export async function getMe(token) {
-  const res = await fetch(`${API_URL}/auth/me`, {
+  const res = await fetch("http://127.0.0.1:8000/auth/me", {
     headers: {
-      Authorization: `Bearer ${token}`
-    }
+      Authorization: `Bearer ${token}`,
+    },
   });
 
   if (!res.ok) throw new Error("Unauthorized");
   return res.json();
 }
-

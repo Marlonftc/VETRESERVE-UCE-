@@ -1,43 +1,38 @@
 import { useState } from "react";
 import { loginRequest } from "../services/authService";
 import { useAuth } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 export default function Login() {
-  const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [error, setError] = useState(null);
+  const { login } = useAuth();
+  const navigate = useNavigate();
 
-  async function handleSubmit(e) {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setError(null);
+
     try {
-      const data = await loginRequest(email, password);
-      login(data.access_token);
+      const { access_token } = await loginRequest(email, password);
+      const user = await login(access_token);
+
+      if (user.role === "admin") navigate("/admin");
+      else if (user.role === "vet_student") navigate("/vet");
+      else navigate("/home");
     } catch (err) {
       setError(err.message);
     }
-  }
+  };
 
   return (
-    <div>
-      <h1>Login</h1>
-
-      <form onSubmit={handleSubmit}>
-        <input
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-        <button type="submit">Login</button>
-      </form>
-
-      {error && <p style={{ color: "red" }}>{error}</p>}
-    </div>
+    <form onSubmit={handleSubmit}>
+      <h2>Login</h2>
+      <input value={email} onChange={(e) => setEmail(e.target.value)} />
+      <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+      <button>Login</button>
+      {error && <p>{error}</p>}
+    </form>
   );
 }
