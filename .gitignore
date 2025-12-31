@@ -1,0 +1,17 @@
+# Node
+node_modules/
+**/node_modules/
+
+# Turbo
+.turbo/
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# Env
+.env
+
+# OS
+.DS_Store

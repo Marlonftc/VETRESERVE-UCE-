@@ -1,0 +1,8 @@
+{
+  "name": "auth-identity-service",
+  "private": true,
+  "scripts": {
+    "dev": "uvicorn app.main:app --reload",
+    "build": "echo backend-build"
+  }
+}
