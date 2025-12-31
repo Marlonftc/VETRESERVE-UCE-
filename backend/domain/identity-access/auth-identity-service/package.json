@@ -2,7 +2,6 @@
   "name": "auth-identity-service",
   "private": true,
   "scripts": {
-    "dev": "uvicorn app.main:app --reload",
-    "build": "echo backend-build"
+    "dev": ".venv\\Scripts\\python -m uvicorn app.main:app --reload --port 8000"
   }
 }
