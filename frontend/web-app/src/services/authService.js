@@ -1,12 +1,10 @@
 export async function loginRequest(email, password) {
-  const body = new URLSearchParams();
-  body.append("username", email);
-  body.append("password", password);
-
   const res = await fetch("http://127.0.0.1:8000/auth/login", {
     method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body,
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ email, password }),
   });
 
   if (!res.ok) {
@@ -14,7 +12,7 @@ export async function loginRequest(email, password) {
     throw new Error(err.detail || "Login failed");
   }
 
-  return res.json();
+  return res.json(); // { access_token, token_type }
 }
 
 export async function getMe(token) {

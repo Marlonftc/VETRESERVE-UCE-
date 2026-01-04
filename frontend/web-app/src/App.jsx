@@ -1,28 +1,86 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import Login from "./pages/Login";
-import Home from "./pages/Home";
-import VetHome from "./pages/VetHome";
-import AdminHome from "./pages/AdminHome";
-import { useAuth } from "./context/AuthContext";
+import { AuthProvider, useAuth } from "./context/AuthContext";
 
-function PrivateRoute({ children, role }) {
-  const { user, loading } = useAuth();
-  if (loading) return null;
-  if (!user) return <Navigate to="/login" />;
-  if (role && user.role !== role) return <Navigate to="/login" />;
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import Home from "./pages/Home";
+import AdminHome from "./pages/AdminHome";
+import VetHome from "./pages/VetHome";
+import VetPending from "./pages/VetPending";
+
+/**
+ * Protected route component based on authentication, role and status.
+ */
+function ProtectedRoute({ children, role, status }) {
+  const { user } = useAuth();
+
+  if (!user) {
+    return <Navigate to="/" replace />;
+  }
+
+  if (role && user.role !== role) {
+    return <Navigate to="/" replace />;
+  }
+
+  if (status && user.status !== status) {
+    return <Navigate to="/vet/pending" replace />;
+  }
+
   return children;
 }
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route path="/home" element={<PrivateRoute role="client"><Home /></PrivateRoute>} />
-        <Route path="/vet" element={<PrivateRoute role="vet_student"><VetHome /></PrivateRoute>} />
-        <Route path="/admin" element={<PrivateRoute role="admin"><AdminHome /></PrivateRoute>} />
-        <Route path="*" element={<Navigate to="/login" />} />
-      </Routes>
-    </BrowserRouter>
+    <AuthProvider>
+      <BrowserRouter>
+        <Routes>
+          {/* Public routes */}
+          <Route path="/" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+
+          {/* Client routes */}
+          <Route
+            path="/home"
+            element={
+              <ProtectedRoute role="CLIENT">
+                <Home />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Admin routes */}
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute role="ADMIN">
+                <AdminHome />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Vet routes */}
+          <Route
+            path="/vet"
+            element={
+              <ProtectedRoute role="VET" status="ACTIVE">
+                <VetHome />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/vet/pending"
+            element={
+              <ProtectedRoute role="VET">
+                <VetPending />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Fallback */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
   );
 }

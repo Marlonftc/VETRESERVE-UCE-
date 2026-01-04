@@ -1,12 +1,23 @@
 from sqlalchemy.orm import Session
+from passlib.context import CryptContext
 from app.models.user import User
 
-# ✅ CREATE USER (client / vet)
-def create_user(db: Session, email: str, role: str):
-    status = "PENDING_APPROVAL" if role == "vet" else "ACTIVE"
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+def hash_password(password: str) -> str:
+    return pwd_context.hash(password)
+
+
+# ✅ CREATE USER
+def create_user(db: Session, email: str, password: str, role: str):
+    if role == "VET":
+        status = "PENDING"
+    else:
+        status = "ACTIVE"
 
     user = User(
         email=email,
+        password=hash_password(password),
         role=role,
         status=status
     )
@@ -16,12 +27,14 @@ def create_user(db: Session, email: str, role: str):
     db.refresh(user)
     return user
 
-# ✅ GET VETS PENDING APPROVAL
+
+# ✅ GET PENDING VETS
 def get_pending_vets(db: Session):
     return db.query(User).filter(
-        User.role == "vet",
-        User.status == "PENDING_APPROVAL"
+        User.role == "VET",
+        User.status == "PENDING"
     ).all()
+
 
 # ✅ APPROVE USER
 def approve_user(db: Session, user_id: int):

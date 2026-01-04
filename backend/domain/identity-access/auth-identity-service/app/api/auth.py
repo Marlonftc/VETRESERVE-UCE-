@@ -1,39 +1,78 @@
-from fastapi import APIRouter, Depends, HTTPException
-from fastapi.security import OAuth2PasswordRequestForm
-from sqlalchemy.orm import Session
+from fastapi import APIRouter, HTTPException, status, Depends
+from pydantic import BaseModel
+import requests
 
-from app.core.database import SessionLocal
-from app.services.auth_service import authenticate_user
 from app.utils.jwt import create_access_token
+from app.core.password import verify_password
 from app.core.security import get_current_user
 
 router = APIRouter()
 
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+USER_MANAGEMENT_VALIDATE_URL = "http://127.0.0.1:8001/users/internal/validate"
+
+
+class LoginRequest(BaseModel):
+    email: str
+    password: str
+
 
 @router.post("/login")
-def login(
-    form_data: OAuth2PasswordRequestForm = Depends(),
-    db: Session = Depends(get_db)
-):
-    user = authenticate_user(db, form_data.username, form_data.password)
-    if not user:
-        raise HTTPException(status_code=401, detail="Invalid credentials")
+def login(data: LoginRequest):
+    """
+    Authenticate user using User Management Service.
+    """
 
+    # 1. Request user data from User Management Service
+    response = requests.post(
+        USER_MANAGEMENT_VALIDATE_URL,
+        json={"email": data.email},
+        timeout=5
+    )
+
+    if response.status_code != 200:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid credentials"
+        )
+
+    user = response.json()
+
+    # 2. Verify password
+    if not verify_password(data.password, user["password_hash"]):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid credentials"
+        )
+
+    # 3. Verify user status
+    if user["status"] not in ["ACTIVE", "APPROVED"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="User is not active"
+        )
+
+    # 4. Create JWT token
     token = create_access_token({
-        "sub": user.email,
-        "role": user.role
+        "sub": str(user["id"]),
+        "email": user["email"],
+        "role": user["role"],
+        "status": user["status"]
     })
-    return {"access_token": token, "token_type": "bearer"}
+
+    return {
+        "access_token": token,
+        "token_type": "bearer"
+    }
+
 
 @router.get("/me")
 def me(current_user: dict = Depends(get_current_user)):
+    """
+    Return current authenticated user information.
+    """
     return {
-        "email": current_user.get("sub"),
+        "id": current_user.get("sub"),
+        "email": current_user.get("email"),
         "role": current_user.get("role"),
+        "status": current_user.get("status"),
     }
