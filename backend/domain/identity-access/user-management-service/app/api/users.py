@@ -1,10 +1,12 @@
-from fastapi import APIRouter, Depends, HTTPException, Header, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List
-
+from app.core.security import hash_password
 from app.core.database import SessionLocal
 from app.schemas.user import UserCreate, UserResponse
 from app.models.user import User
+from app.core.roles import require_role
+from app.core.security import verify_password
 from app.services.user_service import (
     create_user,
     get_pending_vets,
@@ -21,21 +23,6 @@ def get_db():
         yield db
     finally:
         db.close()
-
-
-# TEMPORARY admin guard (will be replaced by JWT role validation)
-def admin_guard(x_role: str = Header(...)):
-    """
-    TEMPORARY:
-    This guard validates admin access using a custom header.
-    It will be replaced later by JWT-based role validation.
-    """
-    if x_role.upper() != "ADMIN":
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Admin only"
-        )
-
 
 @router.post("/register", response_model=UserResponse)
 def register_user(
@@ -58,11 +45,11 @@ def register_user(
 @router.get("/vets/pending", response_model=List[UserResponse])
 def list_pending_vets(
     db: Session = Depends(get_db),
-    _: None = Depends(admin_guard)
+    _: dict = Depends(require_role("ADMIN"))
 ):
     """
-    List all vets with PENDING status.
-    Admin only.
+    List all pending vets.
+    ADMIN only.
     """
     return get_pending_vets(db)
 
@@ -71,12 +58,11 @@ def list_pending_vets(
 def approve_vet(
     user_id: int,
     db: Session = Depends(get_db),
-    _: None = Depends(admin_guard)
+    _: dict = Depends(require_role("ADMIN"))
 ):
     """
     Approve a vet user.
-    Changes status from PENDING to APPROVED.
-    Admin only.
+    ADMIN only.
     """
     user = approve_user(db, user_id)
     if not user:
@@ -87,15 +73,19 @@ def approve_vet(
 
     return user
 
+
 @router.post("/internal/validate")
-def validate_user_credentials(
+def validate_user_internal(
     data: dict,
     db: Session = Depends(get_db)
 ):
     """
     INTERNAL ENDPOINT.
-    Used ONLY by Auth Identity Service to validate user credentials.
+    Used ONLY by Auth Identity Service.
+    Returns user data ONLY.
+    Does NOT validate password.
     """
+
     email = data.get("email")
 
     if not email:

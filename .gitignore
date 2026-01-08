@@ -17,3 +17,10 @@ __pycache__/
 .DS_Store
 
 *.db
+
+aws-lab.ps1
+# Terraform
+**/.terraform/
+**/.terraform.lock.hcl
+**/terraform.tfstate
+**/terraform.tfstate.backup
