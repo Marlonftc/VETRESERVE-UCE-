@@ -1,12 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List
-from app.core.security import hash_password
+
 from app.core.database import SessionLocal
+from app.core.security import hash_password, verify_password
 from app.schemas.user import UserCreate, UserResponse
 from app.models.user import User
 from app.core.roles import require_role
-from app.core.security import verify_password
 from app.services.user_service import (
     create_user,
     get_pending_vets,
@@ -23,6 +23,7 @@ def get_db():
         yield db
     finally:
         db.close()
+
 
 @router.post("/register", response_model=UserResponse)
 def register_user(
@@ -74,6 +75,7 @@ def approve_vet(
     return user
 
 
+# 🔐 INTERNAL — VALIDATES PASSWORD
 @router.post("/internal/validate")
 def validate_user_internal(
     data: dict,
@@ -82,30 +84,35 @@ def validate_user_internal(
     """
     INTERNAL ENDPOINT.
     Used ONLY by Auth Identity Service.
-    Returns user data ONLY.
-    Does NOT validate password.
+    Validates credentials and returns user data.
     """
 
     email = data.get("email")
+    password = data.get("password")
 
-    if not email:
+    if not email or not password:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Email is required"
+            detail="Email and password are required"
         )
 
     user = db.query(User).filter(User.email == email).first()
 
     if not user:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found"
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid credentials"
+        )
+
+    if not verify_password(password, user.password):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid credentials"
         )
 
     return {
         "id": user.id,
         "email": user.email,
-        "password_hash": user.password,
         "role": user.role,
-        "status": user.status,
+        "status": user.status
     }

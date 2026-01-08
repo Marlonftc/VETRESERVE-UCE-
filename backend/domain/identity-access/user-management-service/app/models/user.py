@@ -9,3 +9,4 @@ class User(Base):
     password = Column(String, nullable=False)
     role = Column(String, nullable=False)   # CLIENT | VET | ADMIN
     status = Column(String, nullable=False) # PENDING | ACTIVE
+    

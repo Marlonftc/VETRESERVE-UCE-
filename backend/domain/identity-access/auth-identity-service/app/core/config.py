@@ -1,11 +1,10 @@
 import os
 
-JWT_SECRET = os.getenv("JWT_SECRET", "vetreserve-qa-secret")  
+JWT_SECRET = os.getenv("JWT_SECRET", "vetreserve-qa-secret")
 JWT_ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
 
-
 USER_MANAGEMENT_BASE_URL = os.getenv(
     "USER_MANAGEMENT_BASE_URL",
-    "http://127.0.0.1:8001"
+    "http://127.0.0.1:8000"   # ✅ USER MANAGEMENT
 )

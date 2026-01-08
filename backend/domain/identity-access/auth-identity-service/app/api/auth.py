@@ -20,7 +20,6 @@ def login(data: LoginRequest):
     Authenticate user using User Management Service.
     """
 
-    # 🔐 Delegate credential validation to User Management Service
     response = requests.post(
         f"{USER_MANAGEMENT_BASE_URL}/users/internal/validate",
         json={
@@ -45,7 +44,6 @@ def login(data: LoginRequest):
             detail="User is not active"
         )
 
-    # 🎫 Create JWT token
     token = create_access_token({
         "sub": str(user["id"]),
         "email": user["email"],
@@ -61,9 +59,6 @@ def login(data: LoginRequest):
 
 @router.get("/me")
 def me(current_user: dict = Depends(get_current_user)):
-    """
-    Return current authenticated user information.
-    """
     return {
         "id": current_user.get("sub"),
         "email": current_user.get("email"),

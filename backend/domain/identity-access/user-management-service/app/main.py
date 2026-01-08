@@ -1,7 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.api.users import router as users_router
-from app.core.database import Base, engine
+from app.core.database import Base, engine, SessionLocal
+from app.core.seed_admin import seed_admin
 
 Base.metadata.create_all(bind=engine)
 
@@ -9,6 +10,14 @@ app = FastAPI(
     title="User Management Service",
     version="1.0.0"
 )
+
+@app.on_event("startup")
+def startup_event():
+    db = SessionLocal()
+    try:
+        seed_admin(db)
+    finally:
+        db.close()
 
 app.add_middleware(
     CORSMiddleware,
