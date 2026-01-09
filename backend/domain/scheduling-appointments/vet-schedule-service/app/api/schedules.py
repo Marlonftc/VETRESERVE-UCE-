@@ -11,7 +11,7 @@ router = APIRouter(
     tags=["Vet Schedules"]
 )
 
-# DB dependency
+# Database dependency
 def get_db():
     db = SessionLocal()
     try:
@@ -20,20 +20,23 @@ def get_db():
         db.close()
 
 
+# ==========================
+# CREATE VET SCHEDULE
+# ==========================
 @router.post("", response_model=ScheduleResponse)
 def create(
     data: ScheduleCreate,
     db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_user)
 ):
-    # 🔒 Role check
+    # 🔒 Only vets can create schedules
     if current_user.get("role") != "VET":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Only vets can create schedules"
         )
 
-    # 🔒 Status check (vet aprobado)
+    # 🔒 Vet must be approved
     if current_user.get("status") != "ACTIVE":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -41,28 +44,28 @@ def create(
         )
 
     return create_schedule(
-    db=db,
-    vet_id=current_user.get("sub"),
-    day=data.day,
-    start_time=data.start_time,
-    end_time=data.end_time
-)
-
-
-
-@router.get("/availability", response_model=list[ScheduleResponse])
-def availability(
-    db: Session = Depends(get_db),
-    current_user: dict = Depends(get_current_user)
-):
-    # 🔒 Solo vets pueden consultar SU disponibilidad
-    if current_user.get("role") != "VET":
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Only vets can view availability"
-        )
-
-    return get_availability(
         db=db,
-        vet_id=int(current_user.get("sub"))
+        vet_id=int(current_user.get("sub")),
+        day=data.day,
+        start_time=data.start_time,
+        end_time=data.end_time
     )
+
+
+# ==========================
+# INTERNAL AVAILABILITY CHECK
+# ==========================
+@router.get(
+    "/availability/internal",
+    response_model=list[ScheduleResponse],
+    include_in_schema=False
+)
+def availability_internal(
+    vet_id: int,
+    db: Session = Depends(get_db)
+):
+    """
+    Internal endpoint for Appointment Management Service.
+    No authentication required.
+    """
+    return get_availability(db=db, vet_id=vet_id)

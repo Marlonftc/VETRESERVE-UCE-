@@ -1,17 +1,19 @@
 from pydantic import BaseModel
-from datetime import datetime
+from datetime import date, time
 
 class AppointmentCreate(BaseModel):
-    vet_id: str
-    date: datetime
-    reason: str
+    vet_id: int
+    day: date
+    start_time: time
+    end_time: time
 
 class AppointmentResponse(BaseModel):
     id: int
-    client_id: str
-    vet_id: str
-    date: datetime
-    reason: str
+    client_id: int
+    vet_id: int
+    day: date
+    start_time: time
+    end_time: time
     status: str
 
     class Config:
