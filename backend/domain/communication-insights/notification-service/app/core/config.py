@@ -1,14 +1,17 @@
 import os
 
-KAFKA_BOOTSTRAP_SERVERS = os.getenv("KAFKA_BOOTSTRAP_SERVERS", "localhost:9092")
-KAFKA_TOPIC_APPOINTMENT_CREATED = os.getenv("KAFKA_TOPIC_APPOINTMENT_CREATED", "appointment.created")
+# =========================
+# MQTT
+# =========================
+MQTT_BROKER_HOST = os.getenv("MQTT_BROKER_HOST", "mqtt")
+MQTT_BROKER_PORT = int(os.getenv("MQTT_BROKER_PORT", 1883))
+MQTT_PET_CREATED_TOPIC = os.getenv(
+    "MQTT_PET_CREATED_TOPIC", "pet/created"
+)
 
-RABBITMQ_URL = os.getenv("RABBITMQ_URL", "amqp://guest:guest@localhost:5672/")
-RABBITMQ_QUEUE = os.getenv("RABBITMQ_QUEUE", "notifications.queue")
-
-MQTT_HOST = os.getenv("MQTT_HOST", "localhost")
-MQTT_PORT = int(os.getenv("MQTT_PORT", "1883"))
-MQTT_TOPIC = os.getenv("MQTT_TOPIC", "vetreserve/appointments/created")
-
-
-
+# =========================
+# REDIS
+# =========================
+REDIS_HOST = os.getenv("REDIS_HOST", "redis")
+REDIS_PORT = int(os.getenv("REDIS_PORT", 6379))
+REDIS_DB = int(os.getenv("REDIS_DB", 0))
