@@ -11,7 +11,9 @@ router = APIRouter(
     tags=["Vet Schedules"]
 )
 
+# =====================================
 # Database dependency
+# =====================================
 def get_db():
     db = SessionLocal()
     try:
@@ -29,14 +31,14 @@ def create(
     db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_user)
 ):
-    # 🔒 Only vets can create schedules
+    # Only vets can create schedules
     if current_user.get("role") != "VET":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Only vets can create schedules"
         )
 
-    # 🔒 Vet must be approved
+    # Vet must be approved
     if current_user.get("status") != "ACTIVE":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,

@@ -1,21 +1,11 @@
 from sqlalchemy.orm import Session
-from passlib.context import CryptContext
 from app.models.user import User
 from app.core.security import hash_password
 
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
-def hash_password(password: str) -> str:
-    return pwd_context.hash(password)
-
-
 # ✅ CREATE USER
 def create_user(db: Session, email: str, password: str, role: str):
-    if role == "VET":
-        status = "PENDING"
-    else:
-        status = "ACTIVE"
+    status = "PENDING" if role == "VET" else "ACTIVE"
 
     user = User(
         email=email,

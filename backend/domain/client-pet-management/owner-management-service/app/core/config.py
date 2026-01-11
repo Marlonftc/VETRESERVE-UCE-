@@ -1,9 +1,16 @@
 import os
 
-SQLSERVER_HOST = os.getenv("SQLSERVER_HOST", "localhost")
-SQLSERVER_PORT = os.getenv("SQLSERVER_PORT", "1433")
-SQLSERVER_DB = os.getenv("SQLSERVER_DB", "vetreserve_clientpet")
-SQLSERVER_USER = os.getenv("SQLSERVER_USER", "sa")
-SQLSERVER_PASSWORD = os.getenv("SQLSERVER_PASSWORD", "YourStrong!Passw0rd")
+# PostgreSQL (QA)
+POSTGRES_HOST = os.getenv("POSTGRES_HOST", "postgres")
+POSTGRES_PORT = os.getenv("POSTGRES_PORT", "5432")
+POSTGRES_DB = os.getenv("POSTGRES_DB", "vetreserve_qa")
+POSTGRES_USER = os.getenv("POSTGRES_USER", "postgres")
+POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD", "postgres")
 
-SQLSERVER_DRIVER = "ODBC Driver 17 for SQL Server"
+DATABASE_URL = (
+    f"postgresql+psycopg2://{POSTGRES_USER}:"
+    f"{POSTGRES_PASSWORD}@"
+    f"{POSTGRES_HOST}:"
+    f"{POSTGRES_PORT}/"
+    f"{POSTGRES_DB}"
+)

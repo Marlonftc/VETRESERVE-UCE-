@@ -11,6 +11,7 @@ from app.services.owner_service import (
 
 router = APIRouter(prefix="/owners", tags=["Owners"])
 
+
 def get_db():
     db = SessionLocal()
     try:
@@ -18,13 +19,16 @@ def get_db():
     finally:
         db.close()
 
+
 @router.post("", response_model=OwnerResponse)
 def create(data: OwnerCreate, db: Session = Depends(get_db)):
     return create_owner(db, data)
 
+
 @router.get("", response_model=list[OwnerResponse])
 def list_all(db: Session = Depends(get_db)):
     return get_owners(db)
+
 
 @router.get("/{owner_id}", response_model=OwnerResponse)
 def get_by_id(owner_id: int, db: Session = Depends(get_db)):

@@ -4,3 +4,8 @@ sqlalchemy>=2.0
 pyodbc
 python-dotenv
 python-jose[cryptography]
+kafka-python
+pika
+paho-mqtt
+uvicorn[standard]
+psycopg2-binary

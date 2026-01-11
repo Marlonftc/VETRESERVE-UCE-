@@ -12,6 +12,4 @@ class Appointment(Base):
     start_time = Column(Time, nullable=False)
     end_time = Column(Time, nullable=False)
 
-    status = Column(String, default="SCHEDULED")  
-    # SCHEDULED | CANCELLED | COMPLETED
-
+    status = Column(String, default="SCHEDULED")

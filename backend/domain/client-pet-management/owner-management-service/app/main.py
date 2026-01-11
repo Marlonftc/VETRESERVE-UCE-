@@ -8,6 +8,7 @@ app = FastAPI(title="Owner Management Service")
 
 app.include_router(owners_router)
 
+
 @app.get("/health")
 def health():
     return {"status": "ok"}

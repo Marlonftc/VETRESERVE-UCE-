@@ -2,9 +2,6 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.auth import router as auth_router
-from app.core.database import Base, engine
-
-Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
     title="Auth & Identity Service",
@@ -24,6 +21,7 @@ app.add_middleware(
 )
 
 app.include_router(auth_router, prefix="/auth")
+
 
 @app.get("/health")
 def health_check():
