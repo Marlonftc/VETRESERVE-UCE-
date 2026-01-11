@@ -3,6 +3,6 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "uvicorn app.main:app --reload --port 8003"
+    "dev": "echo \"Service managed by Docker Compose\""
   }
 }
