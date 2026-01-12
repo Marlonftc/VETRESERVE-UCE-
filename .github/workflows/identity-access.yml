@@ -1,0 +1,49 @@
+name: backend-identity-access (QA)
+
+on:
+  push:
+    branches: [ "qa" ]
+    paths:
+      - "backend/domain/identity-access/**"
+      - ".github/workflows/backend-identity-access.yml"
+
+env:
+  REGISTRY: docker.io
+  DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        service:
+          - auth-identity-service
+          - user-management-service
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build & Push (qa tag)
+        uses: docker/build-push-action@v6
+        with:
+          context: backend/domain/identity-access/${{ matrix.service }}
+          file: backend/domain/identity-access/${{ matrix.service }}/Dockerfile
+          push: true
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/vetreserve-${{ matrix.service }}:qa
+            ${{ secrets.DOCKERHUB_USERNAME }}/vetreserve-${{ matrix.service }}:${{ github.sha }}
