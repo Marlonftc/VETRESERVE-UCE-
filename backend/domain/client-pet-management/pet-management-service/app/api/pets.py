@@ -16,7 +16,7 @@ def get_db():
         db.close()
 
 
-@router.post("", response_model=PetResponse)
+@router.post("/", response_model=PetResponse)
 def create(data: PetCreate, db: Session = Depends(get_db)):
     return create_pet(db, data)
 

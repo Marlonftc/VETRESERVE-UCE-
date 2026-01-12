@@ -20,12 +20,12 @@ def get_db():
         db.close()
 
 
-@router.post("", response_model=OwnerResponse)
+@router.post("/", response_model=OwnerResponse)
 def create(data: OwnerCreate, db: Session = Depends(get_db)):
     return create_owner(db, data)
 
 
-@router.get("", response_model=list[OwnerResponse])
+@router.get("/", response_model=list[OwnerResponse])
 def list_all(db: Session = Depends(get_db)):
     return get_owners(db)
 

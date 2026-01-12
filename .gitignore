@@ -26,3 +26,19 @@ aws-lab.ps1
 **/terraform.tfstate.backup
 
 .env
+
+# n8n runtime data
+infra/**/n8n_data/
+*.log
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# OS
+.DS_Store
+Thumbs.db
