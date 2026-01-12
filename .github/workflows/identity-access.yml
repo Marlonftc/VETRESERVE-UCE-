@@ -1,11 +1,12 @@
-name: backend-identity-access (QA)
+name: identity-access (QA)
 
 on:
   push:
-    branches: [ "qa" ]
+    branches:
+      - qa
     paths:
       - "backend/domain/identity-access/**"
-      - ".github/workflows/backend-identity-access.yml"
+      - ".github/workflows/identity-access.yml"
 
 env:
   REGISTRY: docker.io
@@ -23,7 +24,7 @@ jobs:
           - user-management-service
 
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Set up QEMU
@@ -38,7 +39,7 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build & Push (qa tag)
+      - name: Build & Push Docker image (QA)
         uses: docker/build-push-action@v6
         with:
           context: backend/domain/identity-access/${{ matrix.service }}
