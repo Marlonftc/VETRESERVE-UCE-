@@ -1,0 +1,8 @@
+{
+  "name": "user-management-service",
+  "private": true,
+  "scripts": {
+    "dev":  "echo \"Service managed by Docker Compose\"",
+    "start": "uvicorn app.main:app --host 0.0.0.0 --port 8001"
+  }
+}

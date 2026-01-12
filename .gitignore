@@ -1,0 +1,44 @@
+# Node
+node_modules/
+**/node_modules/
+
+# Turbo
+.turbo/
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# Env
+.env
+
+# OS
+.DS_Store
+
+*.db
+
+aws-lab.ps1
+# Terraform
+**/.terraform/
+**/.terraform.lock.hcl
+**/terraform.tfstate
+**/terraform.tfstate.backup
+
+.env
+
+# n8n runtime data
+infra/**/n8n_data/
+*.log
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# OS
+.DS_Store
+Thumbs.db

@@ -1,0 +1,7 @@
+{
+  "name": "appointment-management-service",
+  "private": true,
+  "scripts": {
+    "dev": "echo \"Appointment Management Service managed by Docker\""
+  }
+}
