@@ -1,0 +1,24 @@
+data "aws_ami" "amazon_linux_2023" {
+  most_recent = true
+  owners      = ["amazon"]
+
+  filter {
+    name   = "name"
+    values = ["al2023-ami-*-x86_64"]
+  }
+}
+
+
+resource "aws_instance" "bastion" {
+  ami                    = data.aws_ami.amazon_linux_2023.id
+  instance_type          = "t3.micro"
+  subnet_id              = aws_subnet.public_subnet.id
+  vpc_security_group_ids = [aws_security_group.bastion_sg.id]
+  key_name               = var.ssh_key_name
+
+  tags = {
+    Name = "${var.project_name}-qa-bastion"
+    Env  = "qa"
+  }
+}
+
