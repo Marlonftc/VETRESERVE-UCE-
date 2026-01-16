@@ -22,3 +22,15 @@ resource "aws_instance" "bastion" {
   }
 }
 
+########################################
+# Elastic IP for Bastion Host
+########################################
+resource "aws_eip" "bastion_eip" {
+  instance = aws_instance.bastion.id
+  domain   = "vpc"
+
+  tags = {
+    Name = "${var.project_name}-qa-bastion-eip"
+    Env  = "qa"
+  }
+}
