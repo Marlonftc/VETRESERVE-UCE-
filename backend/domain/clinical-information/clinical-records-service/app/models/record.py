@@ -1,5 +1,4 @@
-from datetime import datetime
-from typing import Optional, List, Dict, Any
+from typing import Dict, Any
 
 
 def record_to_response(doc: Dict[str, Any]) -> Dict[str, Any]:

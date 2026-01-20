@@ -6,7 +6,7 @@ class OwnerCreate(BaseModel):
     last_name: str
     email: EmailStr
     phone: str
-
+    
 
 class OwnerResponse(OwnerCreate):
     id: int

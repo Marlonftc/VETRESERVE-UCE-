@@ -1,16 +1,24 @@
 import os
 
-# PostgreSQL (QA)
-POSTGRES_HOST = os.getenv("POSTGRES_HOST", "postgres")
-POSTGRES_PORT = os.getenv("POSTGRES_PORT", "5432")
-POSTGRES_DB = os.getenv("POSTGRES_DB", "vetreserve_qa")
-POSTGRES_USER = os.getenv("POSTGRES_USER", "postgres")
-POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD", "postgres")
+DATABASE_URL = os.getenv("DATABASE_URL")
 
-DATABASE_URL = (
-    f"postgresql+psycopg2://{POSTGRES_USER}:"
-    f"{POSTGRES_PASSWORD}@"
-    f"{POSTGRES_HOST}:"
-    f"{POSTGRES_PORT}/"
-    f"{POSTGRES_DB}"
-)
+if not DATABASE_URL:
+    DB_HOST = os.getenv("DB_HOST")
+    DB_PORT = os.getenv("DB_PORT", "5432")
+    DB_NAME = os.getenv("DB_NAME")
+    DB_USER = os.getenv("DB_USER")
+    DB_PASSWORD = os.getenv("DB_PASSWORD")
+
+    if not all([DB_HOST, DB_NAME, DB_USER, DB_PASSWORD]):
+        raise RuntimeError("Database environment variables are not set")
+
+    DATABASE_URL = (
+        f"postgresql+psycopg2://{DB_USER}:"
+        f"{DB_PASSWORD}@"
+        f"{DB_HOST}:"
+        f"{DB_PORT}/"
+        f"{DB_NAME}"
+    )
+
+# AUTH (esto NO afecta DB)
+AUTH_BASE_URL = os.getenv("AUTH_BASE_URL", "http://localhost:8000")

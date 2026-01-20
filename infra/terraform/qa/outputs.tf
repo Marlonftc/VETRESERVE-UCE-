@@ -37,3 +37,17 @@ output "qa_observability_private_ip" {
   description = "Private IP of QA OBSERVABILITY instance"
   value       = aws_instance.qa_observability.private_ip
 }
+
+########################################
+# QA API Gateway
+########################################
+output "qa_api_gateway_public_ip" {
+  description = "Public IP of QA API Gateway"
+  value       = aws_eip.qa_api_gateway_eip.public_ip
+}
+
+output "qa_eventing_core_private_ip" {
+  value = aws_instance.qa_eventing_core.private_ip
+}
+
+

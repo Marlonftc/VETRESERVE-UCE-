@@ -3,12 +3,16 @@ from app.models.owner import Owner
 from app.schemas.owner import OwnerCreate
 
 
-def create_owner(db: Session, data: OwnerCreate):
-    owner = Owner(**data.model_dump())
+def create_owner(db: Session, data: OwnerCreate,user_id: int):
+    owner = Owner(
+        **data.model_dump(),
+        user_id=user_id
+    )
     db.add(owner)
     db.commit()
     db.refresh(owner)
     return owner
+
 
 
 def get_owners(db: Session):

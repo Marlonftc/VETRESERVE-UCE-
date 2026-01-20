@@ -5,35 +5,46 @@ from jose import jwt, JWTError
 
 security = HTTPBearer()
 
-# JWT settings (must match the Auth Identity Service)
+# JWT configuration (must match auth-identity-service)
 JWT_SECRET = os.getenv("JWT_SECRET", "vetreserve-qa-secret")
 JWT_ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
 
 
-def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)) -> dict:
+def get_current_user(
+    credentials: HTTPAuthorizationCredentials = Depends(security),
+):
     """
-    Validate JWT locally using a shared secret.
-    Returns the decoded payload if valid.
+    Validates JWT locally using the shared secret.
+    Returns the decoded JWT payload if valid.
     """
     token = credentials.credentials
 
+    # Decode and validate JWT
     try:
-        payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+        payload = jwt.decode(
+            token,
+            JWT_SECRET,
+            algorithms=[JWT_ALGORITHM]
+        )
     except JWTError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid token"
         )
 
-    # Basic required claims validation
-    if not payload.get("sub") or not payload.get("role"):
+    # Required claims validation
+    user_id = payload.get("sub")
+    role = payload.get("role")
+    status_claim = payload.get("status")
+
+    if not user_id or not role:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid token payload"
         )
 
-    # Optional status check (if your token includes it)
-    if payload.get("status") and payload.get("status") != "ACTIVE":
+    # Check user status
+    if status_claim != "ACTIVE":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Inactive user"

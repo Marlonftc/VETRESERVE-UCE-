@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.core.database import SessionLocal
+from app.core.security import get_current_user
 from app.schemas.owner import OwnerCreate, OwnerResponse
 from app.services.owner_service import (
     create_owner,
@@ -12,6 +13,7 @@ from app.services.owner_service import (
 router = APIRouter(prefix="/owners", tags=["Owners"])
 
 
+# Database dependency
 def get_db():
     db = SessionLocal()
     try:
@@ -21,8 +23,23 @@ def get_db():
 
 
 @router.post("/", response_model=OwnerResponse)
-def create(data: OwnerCreate, db: Session = Depends(get_db)):
-    return create_owner(db, data)
+def create(
+    data: OwnerCreate,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user)
+):
+    # Only CLIENT users can create owners
+    if current_user.get("role") != "CLIENT":
+        raise HTTPException(
+            status_code=403,
+            detail="Only clients can create owners"
+        )
+
+    return create_owner(
+        db=db,
+        data=data,
+        user_id=int(current_user["sub"])
+    )
 
 
 @router.get("/", response_model=list[OwnerResponse])

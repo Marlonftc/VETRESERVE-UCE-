@@ -1,4 +1,3 @@
-import threading
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
@@ -10,13 +9,12 @@ from app.messaging.kafka_consumer import start_kafka_consumer
 async def lifespan(app: FastAPI):
     print("🔥 Lifespan startup executed", flush=True)
 
-    thread = threading.Thread(
-        target=start_kafka_consumer,
-        daemon=True
-    )
-    thread.start()
+    # Start Kafka consumer (non-blocking, internal thread)
+    start_kafka_consumer()
 
     yield
+
+    print("🛑 Lifespan shutdown executed", flush=True)
 
 
 app = FastAPI(

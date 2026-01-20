@@ -8,6 +8,10 @@ from app.core.database import get_db
 from app.core.config import CLINICAL_RECORDS_COLLECTION
 from app.models.record import record_to_response
 
+# Event publishers (NO Kafka here)
+from app.messaging.rabbitmq_publisher import publish_clinical_record_created
+from app.messaging.n8n_publisher import notify_n8n
+
 
 def _collection() -> Collection:
     db = get_db()
@@ -31,7 +35,32 @@ def create_record(data: Dict[str, Any]) -> Dict[str, Any]:
     col = _collection()
     result = col.insert_one(doc)
     created = col.find_one({"_id": result.inserted_id})
-    return record_to_response(created)
+
+    response = record_to_response(created)
+
+    # =========================
+    # Domain Event (NON-BLOCKING)
+    # =========================
+    event = {
+        "event_type": "ClinicalRecordCreated",
+        "record_id": response["id"],
+        "pet_id": response["pet_id"],
+        "vet_id": response.get("vet_id"),
+        "summary": response.get("summary"),
+        "created_at": response["created_at"],
+    }
+
+    try:
+        publish_clinical_record_created(event)
+    except Exception as e:
+        print(f"[WARN] RabbitMQ unavailable: {e}", flush=True)
+
+    try:
+        notify_n8n(event)
+    except Exception as e:
+        print(f"[WARN] n8n unavailable: {e}", flush=True)
+
+    return response
 
 
 def get_record_by_id(record_id: str) -> Optional[Dict[str, Any]]:

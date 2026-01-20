@@ -1,0 +1,38 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: qa-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: vetreserve
+      POSTGRES_PASSWORD: vetreserve123
+      POSTGRES_DB: vetreserve_qa
+    ports:
+      - "5432:5432"
+    volumes:
+      - /data/postgres:/var/lib/postgresql/data
+      - /opt/vetreserve/qa/data/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U vetreserve -d vetreserve_qa"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  mongo:
+    image: mongo:7
+    container_name: qa-mongo
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - /data/mongo:/data/db
+
+  redis:
+    image: redis:7-alpine
+    container_name: qa-redis
+    restart: always
+    ports:
+      - "6379:6379"
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - /data/redis:/data

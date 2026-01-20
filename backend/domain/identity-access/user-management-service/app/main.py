@@ -1,8 +1,13 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+
 from app.api.users import router as users_router
 from app.core.database import Base, engine, SessionLocal
 from app.core.seed_admin import seed_admin
+
+
+from app.models.user import User  
+
 
 Base.metadata.create_all(bind=engine)
 
