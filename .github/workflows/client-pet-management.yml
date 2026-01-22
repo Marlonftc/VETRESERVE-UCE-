@@ -36,7 +36,11 @@ jobs:
           cd backend/domain/client-pet-management/${{ matrix.service }}
           pip install -r requirements.txt
 
-      - name: Run pytest
+      - name: Run pytest (health only)
+        env:
+          # 🔹 Dummy env vars ONLY for test import
+          DATABASE_URL: sqlite:///./test.db
+          TESTING: "true"
         run: |
           cd backend/domain/client-pet-management/${{ matrix.service }}
           pytest -q
