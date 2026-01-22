@@ -21,11 +21,13 @@ resource "aws_security_group" "eventing_core_sg" {
 
   # RabbitMQ
   ingress {
-    from_port = 5672
-    to_port   = 5672
-    protocol  = "tcp"
-    self      = true
+  description     = "RabbitMQ access from private services"
+  from_port       = 5672
+  to_port         = 5672
+  protocol        = "tcp"
+  security_groups = [aws_security_group.private_sg.id]
   }
+
 
   ingress {
     from_port = 15672
@@ -34,21 +36,25 @@ resource "aws_security_group" "eventing_core_sg" {
     self      = true
   }
 
-  # MQTT
+   # MQTT
   ingress {
-    from_port = 1883
-    to_port   = 1883
-    protocol  = "tcp"
-    self      = true
+  description     = "MQTT access from private services"
+  from_port       = 1883
+  to_port         = 1883
+  protocol        = "tcp"
+  security_groups = [aws_security_group.private_sg.id]
   }
 
-  # n8n
+  # n8n (only API Gateway)
   ingress {
-    from_port = 5678
-    to_port   = 5678
-    protocol  = "tcp"
-    self      = true
-  }
+  description     = "n8n access from API Gateway"
+  from_port       = 5678
+  to_port         = 5678
+  protocol        = "tcp"
+  security_groups = [aws_security_group.gateway_sg.id]
+}
+
+
 
   egress {
     from_port   = 0
