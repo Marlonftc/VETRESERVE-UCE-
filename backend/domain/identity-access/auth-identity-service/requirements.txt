@@ -5,3 +5,5 @@ passlib[bcrypt]
 python-dotenv
 python-multipart
 requests
+pytest
+httpx 
