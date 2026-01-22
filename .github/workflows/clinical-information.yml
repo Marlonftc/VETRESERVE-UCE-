@@ -13,7 +13,30 @@ env:
   DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
 
 jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          cd backend/domain/clinical-information/clinical-records-service
+          pip install -r requirements.txt
+
+      - name: Run pytest
+        run: |
+          cd backend/domain/clinical-information/clinical-records-service
+          pytest -q
+
   build-and-push:
+    needs: test
     runs-on: ubuntu-latest
 
     steps:
