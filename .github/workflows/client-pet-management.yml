@@ -13,7 +13,36 @@ env:
   DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
 
 jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        service:
+          - owner-management-service
+          - pet-management-service
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          cd backend/domain/client-pet-management/${{ matrix.service }}
+          pip install -r requirements.txt
+
+      - name: Run pytest
+        run: |
+          cd backend/domain/client-pet-management/${{ matrix.service }}
+          pytest -q
+
   build-and-push:
+    needs: test
     runs-on: ubuntu-latest
 
     strategy:
