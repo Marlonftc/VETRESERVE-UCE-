@@ -5,7 +5,7 @@ on:
     branches:
       - qa
     paths:
-      - "terraform/qa/**"
+      - "infra/terraform/qa/**"
       - ".github/workflows/terraform-qa.yml"
 
 jobs:
@@ -21,24 +21,22 @@ jobs:
         with:
           terraform_version: 1.6.6
 
-     
-      - name: Terraform Init (safe mode)
+      - name: Terraform Init (SAFE MODE)
         run: |
-          cd terraform/qa
+          cd infra/terraform/qa
           terraform init -backend=false
 
       - name: Terraform Format Check
         run: |
-          cd terraform/qa
+          cd infra/terraform/qa
           terraform fmt -check
 
       - name: Terraform Validate
         run: |
-          cd terraform/qa
+          cd infra/terraform/qa
           terraform validate
 
-    
       - name: Terraform Plan (dry run)
         run: |
-          cd terraform/qa
+          cd infra/terraform/qa
           terraform plan -lock=false -no-color
