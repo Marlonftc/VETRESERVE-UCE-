@@ -1,5 +1,7 @@
 import json
 import uuid
+import os
+import pika
 
 from app.infrastructure.redis_client import redis_client
 from app.messaging.mqtt_client import MQTTSubscriber
@@ -35,6 +37,33 @@ def handle_pet_created(event: dict):
     )
 
     print(f"[Worker] Notification stored in Redis: {notification}")
+
+    # Publish notification to RabbitMQ (internal queue)
+    try:
+        rabbitmq_host = os.getenv("RABBITMQ_HOST", "rabbitmq")
+
+        connection = pika.BlockingConnection(
+            pika.ConnectionParameters(host=rabbitmq_host)
+        )
+        channel = connection.channel()
+
+        channel.queue_declare(
+            queue="notifications.queue",
+            durable=True
+        )
+
+        channel.basic_publish(
+            exchange="",
+            routing_key="notifications.queue",
+            body=json.dumps(notification),
+            properties=pika.BasicProperties(delivery_mode=2)
+        )
+
+        connection.close()
+        print("[RABBITMQ] Published to notifications.queue")
+
+    except Exception as e:
+        print(f"[RABBITMQ] Error publishing message: {e}")
 
 
 def run_worker():

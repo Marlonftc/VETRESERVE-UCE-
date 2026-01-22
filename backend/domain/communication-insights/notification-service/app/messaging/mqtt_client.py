@@ -1,4 +1,5 @@
 import json
+import time
 import paho.mqtt.client as mqtt
 
 from app.core.config import (
@@ -20,8 +21,15 @@ class MQTTSubscriber:
         self.client.on_connect = self.on_connect
         self.client.on_message = self.on_message
 
-        print(f"[MQTT] Connecting to {MQTT_BROKER_HOST}:{MQTT_BROKER_PORT}")
-        self.client.connect(MQTT_BROKER_HOST, MQTT_BROKER_PORT, 60)
+        # 🔁 Retry loop for cloud environments (AWS-safe)
+        while True:
+            try:
+                print(f"[MQTT] Trying to connect to {MQTT_BROKER_HOST}:{MQTT_BROKER_PORT}")
+                self.client.connect(MQTT_BROKER_HOST, MQTT_BROKER_PORT, 60)
+                break
+            except Exception as e:
+                print(f"[MQTT] Connection failed, retrying in 5s: {e}")
+                time.sleep(5)
 
     def on_connect(self, client, userdata, flags, rc):
         if rc == 0:
