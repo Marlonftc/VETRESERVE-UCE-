@@ -1,8 +1,16 @@
 import os
 
+# =========================
+# Testing mode
+# =========================
+TESTING = os.getenv("TESTING") == "true"
+
+# =========================
+# Database configuration
+# =========================
 DATABASE_URL = os.getenv("DATABASE_URL")
 
-if not DATABASE_URL:
+if not DATABASE_URL and not TESTING:
     DB_HOST = os.getenv("DB_HOST")
     DB_PORT = os.getenv("DB_PORT", "5432")
     DB_NAME = os.getenv("DB_NAME")
@@ -20,5 +28,8 @@ if not DATABASE_URL:
         f"{DB_NAME}"
     )
 
-# AUTH (esto NO afecta DB)
+# =========================
+# External services
+# =========================
+# AUTH (does NOT affect DB or testing)
 AUTH_BASE_URL = os.getenv("AUTH_BASE_URL", "http://localhost:8000")
