@@ -13,7 +13,39 @@ env:
   DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
 
 jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        service:
+          - appointment-management-service
+          - vet-schedule-service
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          cd backend/domain/scheduling-appointments/${{ matrix.service }}
+          pip install -r requirements.txt
+
+      - name: Run pytest
+        env:
+          TESTING: "true"
+        run: |
+          cd backend/domain/scheduling-appointments/${{ matrix.service }}
+          pytest -q
+
   build-and-push:
+    needs: test
     runs-on: ubuntu-latest
 
     strategy:
