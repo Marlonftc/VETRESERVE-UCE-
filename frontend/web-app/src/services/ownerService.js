@@ -1,6 +1,6 @@
 import { API_BASE, authHeaders } from "./apiConfig";
 
-const OWNER_SERVICE_URL = `${API_BASE}/api/owners`;
+const OWNER_SERVICE_URL = `${API_BASE}/api/owners/`;
 
 export async function listOwners(token) {
   const res = await fetch(`${OWNER_SERVICE_URL}`, {

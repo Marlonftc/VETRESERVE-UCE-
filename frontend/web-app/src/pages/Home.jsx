@@ -84,36 +84,44 @@ export default function Home() {
   }, [token]);
 
   const handleOwnerCreate = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  console.log("Submitting owner:", ownerForm); // 👈 DEBUG
+    if (
+      !ownerForm.first_name ||
+      !ownerForm.last_name ||
+      !ownerForm.email ||
+      !ownerForm.phone
+    ) {
+      setOwnersError("All fields are required");
+      return;
+    }
 
-  if (
-    !ownerForm.first_name ||
-    !ownerForm.last_name ||
-    !ownerForm.email ||
-    !ownerForm.phone
-  ) {
-    setOwnersError("All fields are required");
-    return;
-  }
+    const userId = user?.id ?? user?.user_id;
+    if (!userId) {
+      setOwnersError("Missing user id. Please sign in again.");
+      return;
+    }
 
-  try {
-    await createOwner(ownerForm, token);
+    try {
+      const payload = {
+        ...ownerForm,
+        user_id: Number(userId),
+      };
+      await createOwner(payload, token);
 
-    const data = await listOwners(token);
-    setOwners(data);
+      const data = await listOwners(token);
+      setOwners(data);
 
-    setOwnerForm({
-      first_name: "",
-      last_name: "",
-      email: "",
-      phone: "",
-    });
-  } catch (err) {
-    setOwnersError(err.message);
-  }
-};
+      setOwnerForm({
+        first_name: "",
+        last_name: "",
+        email: "",
+        phone: "",
+      });
+    } catch (err) {
+      setOwnersError(err.message);
+    }
+  };
 
 
 
