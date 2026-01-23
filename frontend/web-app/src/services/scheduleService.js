@@ -1,6 +1,6 @@
 import { API_BASE, authHeaders } from "./apiConfig";
 
-const SCHEDULE_URL = `${API_BASE}/api/schedules`;
+const SCHEDULE_URL = `${API_BASE}/api/vet-schedules`;
 
 export async function createSchedule(data, token) {
   const res = await fetch(`${SCHEDULE_URL}/`, {
