@@ -1,9 +1,9 @@
 import { API_BASE, authHeaders } from "./apiConfig";
 
-const PET_SERVICE_URL = `${API_BASE}/api/pets`;
+const PET_SERVICE_URL = `${API_BASE}/api/pets/`;
 
 export async function listPetsByOwner(ownerId) {
-  const res = await fetch(`${PET_SERVICE_URL}/owner/${ownerId}`);
+  const res = await fetch(`${PET_SERVICE_URL}owner/${ownerId}`);
 
   if (!res.ok) {
     throw new Error("Failed to load pets");
