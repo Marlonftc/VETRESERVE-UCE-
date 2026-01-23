@@ -83,11 +83,11 @@ export default function Home() {
       .finally(() => setOwnersLoading(false));
   }, [token]);
 
-   const handleOwnerCreate = async (e) => {
+  const handleOwnerCreate = async (e) => {
   e.preventDefault();
-  setOwnersError(null);
 
-  // 🔐 Validación extra (defensiva)
+  console.log("Submitting owner:", ownerForm); // 👈 DEBUG
+
   if (
     !ownerForm.first_name ||
     !ownerForm.last_name ||
@@ -101,7 +101,6 @@ export default function Home() {
   try {
     await createOwner(ownerForm, token);
 
-    
     const data = await listOwners(token);
     setOwners(data);
 
@@ -115,6 +114,7 @@ export default function Home() {
     setOwnersError(err.message);
   }
 };
+
 
 
   const handleOwnerSelect = async (ownerId) => {
