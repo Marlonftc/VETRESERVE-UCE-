@@ -3,7 +3,7 @@ import { API_BASE, authHeaders } from "./apiConfig";
 const APPOINTMENT_URL = `${API_BASE}/api/appointments`;
 
 export async function createAppointment(data, token) {
-  const res = await fetch(`${APPOINTMENT_URL}/`, {
+  const res = await fetch(`${APPOINTMENT_URL}`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
