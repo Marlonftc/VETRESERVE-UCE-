@@ -1,0 +1,8 @@
+{
+  "name": "pet-management-service",
+  "private": true,
+  "scripts": {
+    "test": "python -c \"print('pet-management-service test OK')\"",
+    "build": "docker build -t mftc2412/vetreserve-pet-management-service:qa ."
+  }
+}

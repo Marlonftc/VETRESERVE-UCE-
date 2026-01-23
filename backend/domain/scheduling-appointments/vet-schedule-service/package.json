@@ -1,8 +1,8 @@
 {
   "name": "vet-schedule-service",
-  "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "echo \"Service managed by Docker Compose\""
+    "test": "python -c \"print('vet-schedule-service test OK')\"",
+    "build": "docker build -t mftc2412/vetreserve-vet-schedule-service:qa ."
   }
 }

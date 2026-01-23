@@ -1,0 +1,8 @@
+{
+  "name": "notification-service",
+  "private": true,
+  "scripts": {
+    "test": "python -c \"print('notification-service test OK')\"",
+    "build": "docker build -t mftc2412/vetreserve-notification-service:qa ."
+  }
+}

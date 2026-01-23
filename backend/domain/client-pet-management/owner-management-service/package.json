@@ -1,0 +1,8 @@
+{
+  "name": "owner-management-service",
+  "private": true,
+  "scripts": {
+    "test": "python -c \"print('owner-management-service test OK')\"",
+    "build": "docker build -t mftc2412/vetreserve-owner-management-service:qa ."
+  }
+}

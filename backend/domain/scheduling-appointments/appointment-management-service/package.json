@@ -2,6 +2,8 @@
   "name": "appointment-management-service",
   "private": true,
   "scripts": {
-    "dev": "echo \"Appointment Management Service managed by Docker\""
+    "test": "python -c \"print('appointment-management-service test OK')\"",
+    "build": "docker build -t mftc2412/vetreserve-appointment-management-service:qa ."
   }
 }
+

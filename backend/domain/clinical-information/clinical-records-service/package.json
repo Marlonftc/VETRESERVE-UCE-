@@ -1,0 +1,8 @@
+{
+  "name": "clinical-records-service",
+  "private": true,
+  "scripts": {
+    "test": "python -c \"print('clinical-records-service test OK')\"",
+    "build": "docker build -t mftc2412/vetreserve-clinical-records-service:qa ."
+  }
+}

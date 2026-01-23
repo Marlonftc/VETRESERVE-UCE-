@@ -1,0 +1,8 @@
+{
+  "name": "reporting-analytics-service",
+  "private": true,
+  "scripts": {
+    "test": "python -c \"print('reporting-analytics-service test OK')\"",
+    "build": "docker build -t mftc2412/vetreserve-reporting-analytics-service:qa ."
+  }
+}

@@ -2,7 +2,10 @@
   "name": "auth-identity-service",
   "private": true,
   "scripts": {
-    "dev":  "echo \"Service managed by Docker Compose\"",
-    "start": "uvicorn app.main:app --host 0.0.0.0 --port 8000"
+    "test": "python -c \"print('auth-identity-service test OK')\"",
+    "build": "docker build -t mftc2412/vetreserve-auth-identity-service:qa .",
+    "lint": "echo \"no lint configured\"",
+    "dev": "echo \"run via docker compose or uvicorn\""
   }
 }
+

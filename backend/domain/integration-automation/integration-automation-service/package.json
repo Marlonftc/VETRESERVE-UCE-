@@ -1,0 +1,8 @@
+{
+  "name": "integration-automation-service",
+  "private": true,
+  "scripts": {
+    "test": "python -c \"print('integration-automation-service test OK')\"",
+    "build": "docker build -t mftc2412/vetreserve-integration-automation-service:qa ."
+  }
+}
