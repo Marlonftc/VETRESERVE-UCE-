@@ -10,7 +10,7 @@ on:
 env:
   REGISTRY: docker.io
   DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-  VITE_API_BASE: http://ec2-34-237-174-159.compute-1.amazonaws.com:8080
+  VITE_API_BASE: http://ec2-34-237-174-159.compute-1.amazonaws.com
   FRONTEND_PORT: 3000
 
 jobs:
