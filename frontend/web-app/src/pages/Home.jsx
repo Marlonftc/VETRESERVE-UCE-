@@ -83,17 +83,39 @@ export default function Home() {
       .finally(() => setOwnersLoading(false));
   }, [token]);
 
-  const handleOwnerCreate = async (e) => {
-    e.preventDefault();
-    setOwnersError(null);
-    try {
-      const created = await createOwner(ownerForm, token);
-      setOwners((prev) => [created, ...prev]);
-      setOwnerForm({ first_name: "", last_name: "", email: "", phone: "" });
-    } catch (err) {
-      setOwnersError(err.message);
-    }
-  };
+   const handleOwnerCreate = async (e) => {
+  e.preventDefault();
+  setOwnersError(null);
+
+  // 🔐 Validación extra (defensiva)
+  if (
+    !ownerForm.first_name ||
+    !ownerForm.last_name ||
+    !ownerForm.email ||
+    !ownerForm.phone
+  ) {
+    setOwnersError("All fields are required");
+    return;
+  }
+
+  try {
+    await createOwner(ownerForm, token);
+
+    
+    const data = await listOwners(token);
+    setOwners(data);
+
+    setOwnerForm({
+      first_name: "",
+      last_name: "",
+      email: "",
+      phone: "",
+    });
+  } catch (err) {
+    setOwnersError(err.message);
+  }
+};
+
 
   const handleOwnerSelect = async (ownerId) => {
     setSelectedOwnerId(ownerId);
