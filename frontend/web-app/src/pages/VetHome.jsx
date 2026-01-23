@@ -16,6 +16,7 @@ export default function VetHome() {
   const [appointmentsLoading, setAppointmentsLoading] = useState(true);
   const [appointmentsError, setAppointmentsError] = useState(null);
   const [scheduleMessage, setScheduleMessage] = useState(null);
+  const [latestSchedule, setLatestSchedule] = useState(null);
   const [records, setRecords] = useState([]);
   const [recordsLoading, setRecordsLoading] = useState(false);
   const [recordsError, setRecordsError] = useState(null);
@@ -52,7 +53,7 @@ export default function VetHome() {
     {
       key: "appointments",
       title: "Assigned cases",
-      description: "Review scheduled appointments.",
+      description: "View upcoming appointments.",
       icon: (
         <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.8">
           <circle cx="8" cy="8" r="3"></circle>
@@ -64,7 +65,7 @@ export default function VetHome() {
     {
       key: "availability",
       title: "Availability",
-      description: "Add today's schedule.",
+      description: "Set your working hours.",
       icon: (
         <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.8">
           <rect x="3" y="5" width="18" height="16" rx="2"></rect>
@@ -75,7 +76,7 @@ export default function VetHome() {
     {
       key: "records",
       title: "Clinical records",
-      description: "Search and update records.",
+      description: "Create and update records.",
       icon: (
         <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.8">
           <path d="M7 3h7l5 5v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z"></path>
@@ -103,7 +104,8 @@ export default function VetHome() {
     e.preventDefault();
     setScheduleMessage(null);
     try {
-      await createSchedule(scheduleForm, token);
+      const created = await createSchedule(scheduleForm, token);
+      setLatestSchedule(created);
       setScheduleMessage("Schedule created successfully.");
       setScheduleForm({ day: "", start_time: "", end_time: "" });
     } catch (err) {
@@ -251,7 +253,10 @@ export default function VetHome() {
                 <div className="section-header">
                   <div>
                     <h4>Assigned cases</h4>
-                    <p className="muted">Review your scheduled appointments.</p>
+                    <p className="muted">
+                      Review your scheduled appointments. Create availability first to receive
+                      bookings.
+                    </p>
                   </div>
                   <button className="btn secondary small" type="button" onClick={loadAppointments}>
                     Refresh
@@ -262,13 +267,21 @@ export default function VetHome() {
                 {appointmentsError && <div className="error">{appointmentsError}</div>}
 
                 <div className="list">
-                  {appointments.map((appt) => (
+                  {[...appointments]
+                    .sort((a, b) => {
+                      const aKey = `${a.day} ${a.start_time}`;
+                      const bKey = `${b.day} ${b.start_time}`;
+                      return aKey.localeCompare(bKey);
+                    })
+                    .map((appt) => (
                     <div key={appt.id} className="list-item">
                       <div>
                         <strong>{appt.day}</strong>
                         <div className="muted">
-                          {appt.start_time} - {appt.end_time}
+                          {String(appt.start_time).slice(0, 5)} -{" "}
+                          {String(appt.end_time).slice(0, 5)}
                         </div>
+                        <div className="muted">Client ID: {appt.client_id}</div>
                       </div>
                       <span className="badge">{appt.status}</span>
                     </div>
@@ -291,11 +304,11 @@ export default function VetHome() {
 
                 <form className="form" onSubmit={handleScheduleCreate}>
                   <div className="form-row">
-                    <label htmlFor="scheduleDay">Day</label>
+                    <label htmlFor="scheduleDay">Date</label>
                     <input
                       id="scheduleDay"
                       className="input"
-                      placeholder="Monday"
+                      type="date"
                       value={scheduleForm.day}
                       onChange={(e) =>
                         setScheduleForm((prev) => ({ ...prev, day: e.target.value }))
@@ -330,6 +343,13 @@ export default function VetHome() {
                     />
                   </div>
                   {scheduleMessage && <p className="helper">{scheduleMessage}</p>}
+                  {latestSchedule && (
+                    <div className="helper">
+                      Last saved availability: {latestSchedule.day}{" "}
+                      {String(latestSchedule.start_time).slice(0, 5)} -{" "}
+                      {String(latestSchedule.end_time).slice(0, 5)}
+                    </div>
+                  )}
                   <button className="btn primary" type="submit">
                     Create schedule
                   </button>
