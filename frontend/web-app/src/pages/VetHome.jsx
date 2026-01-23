@@ -21,6 +21,13 @@ export default function VetHome() {
   const [recordsError, setRecordsError] = useState(null);
   const [recordMessage, setRecordMessage] = useState(null);
   const [recordEditMessage, setRecordEditMessage] = useState(null);
+  const [openPanels, setOpenPanels] = useState({
+    appointments: true,
+    schedule: false,
+    records: false,
+    createRecord: false,
+    editRecord: false,
+  });
 
   const [scheduleForm, setScheduleForm] = useState({
     day: "",
@@ -157,6 +164,70 @@ export default function VetHome() {
     }
   };
 
+  const togglePanel = (key) => {
+    setOpenPanels((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  const actionCards = [
+    {
+      key: "appointments",
+      title: "Assigned cases",
+      description: "Review scheduled appointments.",
+      icon: (
+        <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.8">
+          <circle cx="8" cy="8" r="3"></circle>
+          <path d="M3.5 19a4.5 4.5 0 0 1 9 0"></path>
+          <path d="M13 7h8M13 11h6"></path>
+        </svg>
+      ),
+    },
+    {
+      key: "schedule",
+      title: "Availability",
+      description: "Add today's schedule.",
+      icon: (
+        <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.8">
+          <rect x="3" y="5" width="18" height="16" rx="2"></rect>
+          <path d="M7 3v4M17 3v4M3 10h18"></path>
+        </svg>
+      ),
+    },
+    {
+      key: "records",
+      title: "Clinical records",
+      description: "Search by pet ID.",
+      icon: (
+        <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.8">
+          <path d="M7 3h7l5 5v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z"></path>
+          <path d="M14 3v6h6"></path>
+        </svg>
+      ),
+    },
+    {
+      key: "createRecord",
+      title: "New record",
+      description: "Add a clinical record.",
+      icon: (
+        <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.8">
+          <path d="M7 3h7l5 5v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z"></path>
+          <path d="M14 3v6h6"></path>
+          <path d="M12 12v6M9 15h6"></path>
+        </svg>
+      ),
+    },
+    {
+      key: "editRecord",
+      title: "Edit record",
+      description: "Update or delete.",
+      icon: (
+        <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.8">
+          <path d="M4 20h4l11-11a2.2 2.2 0 0 0-4-4L4 16v4Z"></path>
+          <path d="M13 6l4 4"></path>
+        </svg>
+      ),
+    },
+  ];
+
   return (
     <main className="page">
       <header className="dashboard-header">
@@ -165,271 +236,380 @@ export default function VetHome() {
           <h1>Welcome, {user?.email}</h1>
           <p className="muted">Review appointments and manage your availability.</p>
         </div>
-        <button className="btn secondary" onClick={logout}>
-          Sign out
-        </button>
+        <div className="dashboard-actions">
+          <button className="btn secondary" onClick={logout}>
+            Sign out
+          </button>
+        </div>
       </header>
+
+      <section className="action-grid" aria-label="Quick actions">
+        {actionCards.map((card) => (
+          <button
+            key={card.key}
+            type="button"
+            className={`action-card ${openPanels[card.key] ? "active" : ""}`}
+            onClick={() => togglePanel(card.key)}
+            aria-pressed={openPanels[card.key]}
+          >
+            <span className="action-icon" aria-hidden="true">
+              {card.icon}
+            </span>
+            <div>
+              <h4>{card.title}</h4>
+              <p className="muted">{card.description}</p>
+            </div>
+          </button>
+        ))}
+      </section>
 
       <section className="panel-grid">
         <article className="panel">
-          <h3>Assigned cases</h3>
-          <p className="muted">Review your scheduled appointments.</p>
+          <div className="panel-header">
+            <div>
+              <h3>Assigned cases</h3>
+              <p className="muted">Review your scheduled appointments.</p>
+            </div>
+            <button
+              className="btn secondary small"
+              type="button"
+              onClick={() => togglePanel("appointments")}
+              aria-expanded={openPanels.appointments}
+              aria-controls="panel-appointments"
+            >
+              {openPanels.appointments ? "Hide" : "Show"}
+            </button>
+          </div>
 
-          {appointmentsLoading && <p className="muted">Loading appointments...</p>}
-          {appointmentsError && <div className="error">{appointmentsError}</div>}
+          {openPanels.appointments && (
+            <div className="panel-body" id="panel-appointments">
+              {appointmentsLoading && <p className="muted">Loading appointments...</p>}
+              {appointmentsError && <div className="error">{appointmentsError}</div>}
 
-          <div className="list">
-            {appointments.map((appt) => (
-              <div key={appt.id} className="list-item">
-                <div>
-                  <strong>{appt.day}</strong>
-                  <div className="muted">
-                    {appt.start_time} - {appt.end_time}
+              <div className="list">
+                {appointments.map((appt) => (
+                  <div key={appt.id} className="list-item">
+                    <div>
+                      <strong>{appt.day}</strong>
+                      <div className="muted">
+                        {appt.start_time} - {appt.end_time}
+                      </div>
+                    </div>
+                    <span className="badge">{appt.status}</span>
                   </div>
-                </div>
-                <span className="badge">{appt.status}</span>
+                ))}
+                {!appointmentsLoading && appointments.length === 0 && (
+                  <p className="muted">No appointments assigned.</p>
+                )}
               </div>
-            ))}
-            {!appointmentsLoading && appointments.length === 0 && (
-              <p className="muted">No appointments assigned.</p>
-            )}
+            </div>
+          )}
+        </article>
+
+        <article className="panel">
+          <div className="panel-header">
+            <div>
+              <h3>Today&apos;s schedule</h3>
+              <p className="muted">Add availability for clients to book.</p>
+            </div>
+            <button
+              className="btn secondary small"
+              type="button"
+              onClick={() => togglePanel("schedule")}
+              aria-expanded={openPanels.schedule}
+              aria-controls="panel-schedule"
+            >
+              {openPanels.schedule ? "Hide" : "Show"}
+            </button>
           </div>
-        </article>
 
-        <article className="panel">
-          <h3>Today&apos;s schedule</h3>
-          <p className="muted">Add availability for clients to book.</p>
-
-          <form className="form" onSubmit={handleScheduleCreate}>
-            <div className="form-row">
-              <label htmlFor="scheduleDay">Day</label>
-              <input
-                id="scheduleDay"
-                className="input"
-                placeholder="Monday"
-                value={scheduleForm.day}
-                onChange={(e) => setScheduleForm((prev) => ({ ...prev, day: e.target.value }))}
-                required
-              />
-            </div>
-            <div className="form-row">
-              <label htmlFor="scheduleStart">Start time</label>
-              <input
-                id="scheduleStart"
-                className="input"
-                type="time"
-                value={scheduleForm.start_time}
-                onChange={(e) =>
-                  setScheduleForm((prev) => ({ ...prev, start_time: e.target.value }))
-                }
-                required
-              />
-            </div>
-            <div className="form-row">
-              <label htmlFor="scheduleEnd">End time</label>
-              <input
-                id="scheduleEnd"
-                className="input"
-                type="time"
-                value={scheduleForm.end_time}
-                onChange={(e) =>
-                  setScheduleForm((prev) => ({ ...prev, end_time: e.target.value }))
-                }
-                required
-              />
-            </div>
-            {scheduleMessage && <p className="helper">{scheduleMessage}</p>}
-            <button className="btn primary" type="submit">
-              Create schedule
-            </button>
-          </form>
-        </article>
-
-        <article className="panel">
-          <h3>Clinical records</h3>
-          <p className="muted">Search records by pet ID.</p>
-
-          <form className="form" onSubmit={handleRecordsFetch}>
-            <div className="form-row">
-              <label htmlFor="vetRecordPetId">Pet ID</label>
-              <input
-                id="vetRecordPetId"
-                className="input"
-                type="number"
-                min="1"
-                value={recordsPetId}
-                onChange={(e) => setRecordsPetId(e.target.value)}
-                required
-              />
-            </div>
-            <button className="btn primary" type="submit">
-              Load records
-            </button>
-          </form>
-
-          {recordsLoading && <p className="muted">Loading records...</p>}
-          {recordsError && <div className="error">{recordsError}</div>}
-
-          <div className="list">
-            {records.map((record) => (
-              <div key={record.id} className="list-item">
-                <div>
-                  <strong>{record.diagnosis || "Clinical record"}</strong>
-                  <div className="muted">{record.summary || "No summary provided."}</div>
+          {openPanels.schedule && (
+            <div className="panel-body" id="panel-schedule">
+              <form className="form" onSubmit={handleScheduleCreate}>
+                <div className="form-row">
+                  <label htmlFor="scheduleDay">Day</label>
+                  <input
+                    id="scheduleDay"
+                    className="input"
+                    placeholder="Monday"
+                    value={scheduleForm.day}
+                    onChange={(e) =>
+                      setScheduleForm((prev) => ({ ...prev, day: e.target.value }))
+                    }
+                    required
+                  />
                 </div>
-                <span className="badge">{record.created_at?.slice(0, 10) || "n/a"}</span>
+                <div className="form-row">
+                  <label htmlFor="scheduleStart">Start time</label>
+                  <input
+                    id="scheduleStart"
+                    className="input"
+                    type="time"
+                    value={scheduleForm.start_time}
+                    onChange={(e) =>
+                      setScheduleForm((prev) => ({ ...prev, start_time: e.target.value }))
+                    }
+                    required
+                  />
+                </div>
+                <div className="form-row">
+                  <label htmlFor="scheduleEnd">End time</label>
+                  <input
+                    id="scheduleEnd"
+                    className="input"
+                    type="time"
+                    value={scheduleForm.end_time}
+                    onChange={(e) =>
+                      setScheduleForm((prev) => ({ ...prev, end_time: e.target.value }))
+                    }
+                    required
+                  />
+                </div>
+                {scheduleMessage && <p className="helper">{scheduleMessage}</p>}
+                <button className="btn primary" type="submit">
+                  Create schedule
+                </button>
+              </form>
+            </div>
+          )}
+        </article>
+
+        <article className="panel">
+          <div className="panel-header">
+            <div>
+              <h3>Clinical records</h3>
+              <p className="muted">Search records by pet ID.</p>
+            </div>
+            <button
+              className="btn secondary small"
+              type="button"
+              onClick={() => togglePanel("records")}
+              aria-expanded={openPanels.records}
+              aria-controls="panel-records"
+            >
+              {openPanels.records ? "Hide" : "Show"}
+            </button>
+          </div>
+
+          {openPanels.records && (
+            <div className="panel-body" id="panel-records">
+              <form className="form" onSubmit={handleRecordsFetch}>
+                <div className="form-row">
+                  <label htmlFor="vetRecordPetId">Pet ID</label>
+                  <input
+                    id="vetRecordPetId"
+                    className="input"
+                    type="number"
+                    min="1"
+                    value={recordsPetId}
+                    onChange={(e) => setRecordsPetId(e.target.value)}
+                    required
+                  />
+                </div>
+                <button className="btn primary" type="submit">
+                  Load records
+                </button>
+              </form>
+
+              {recordsLoading && <p className="muted">Loading records...</p>}
+              {recordsError && <div className="error">{recordsError}</div>}
+
+              <div className="list">
+                {records.map((record) => (
+                  <div key={record.id} className="list-item">
+                    <div>
+                      <strong>{record.diagnosis || "Clinical record"}</strong>
+                      <div className="muted">{record.summary || "No summary provided."}</div>
+                    </div>
+                    <span className="badge">{record.created_at?.slice(0, 10) || "n/a"}</span>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
+            </div>
+          )}
         </article>
 
         <article className="panel">
-          <h3>Create clinical record</h3>
-          <p className="muted">Add a new record for a pet.</p>
-
-          <form className="form" onSubmit={handleRecordCreate}>
-            <div className="form-row">
-              <label htmlFor="newPetId">Pet ID</label>
-              <input
-                id="newPetId"
-                className="input"
-                type="number"
-                min="1"
-                value={recordForm.pet_id}
-                onChange={(e) => setRecordForm((prev) => ({ ...prev, pet_id: e.target.value }))}
-                required
-              />
+          <div className="panel-header">
+            <div>
+              <h3>Create clinical record</h3>
+              <p className="muted">Add a new record for a pet.</p>
             </div>
-            <div className="form-row">
-              <label htmlFor="newVetId">Vet ID (optional)</label>
-              <input
-                id="newVetId"
-                className="input"
-                type="number"
-                min="1"
-                value={recordForm.vet_id}
-                onChange={(e) => setRecordForm((prev) => ({ ...prev, vet_id: e.target.value }))}
-              />
-            </div>
-            <div className="form-row">
-              <label htmlFor="newSummary">Summary</label>
-              <input
-                id="newSummary"
-                className="input"
-                value={recordForm.summary}
-                onChange={(e) => setRecordForm((prev) => ({ ...prev, summary: e.target.value }))}
-              />
-            </div>
-            <div className="form-row">
-              <label htmlFor="newDiagnosis">Diagnosis</label>
-              <input
-                id="newDiagnosis"
-                className="input"
-                value={recordForm.diagnosis}
-                onChange={(e) => setRecordForm((prev) => ({ ...prev, diagnosis: e.target.value }))}
-              />
-            </div>
-            <div className="form-row">
-              <label htmlFor="newTreatment">Treatment</label>
-              <input
-                id="newTreatment"
-                className="input"
-                value={recordForm.treatment}
-                onChange={(e) => setRecordForm((prev) => ({ ...prev, treatment: e.target.value }))}
-              />
-            </div>
-            <div className="form-row">
-              <label htmlFor="newNotes">Notes</label>
-              <textarea
-                id="newNotes"
-                className="input"
-                rows="3"
-                value={recordForm.notes}
-                onChange={(e) => setRecordForm((prev) => ({ ...prev, notes: e.target.value }))}
-              />
-            </div>
-            {recordMessage && <p className="helper">{recordMessage}</p>}
-            <button className="btn primary" type="submit">
-              Create record
-            </button>
-          </form>
-        </article>
-
-        <article className="panel">
-          <h3>Edit clinical record</h3>
-          <p className="muted">Load a record by ID and update or delete it.</p>
-
-          <div className="form-row">
-            <label htmlFor="editRecordId">Record ID</label>
-            <input
-              id="editRecordId"
-              className="input"
-              value={recordEditForm.record_id}
-              onChange={(e) =>
-                setRecordEditForm((prev) => ({ ...prev, record_id: e.target.value }))
-              }
-            />
-            <button className="btn secondary" type="button" onClick={handleRecordLookup}>
-              Load
+            <button
+              className="btn secondary small"
+              type="button"
+              onClick={() => togglePanel("createRecord")}
+              aria-expanded={openPanels.createRecord}
+              aria-controls="panel-create-record"
+            >
+              {openPanels.createRecord ? "Hide" : "Show"}
             </button>
           </div>
 
-          <form className="form" onSubmit={handleRecordUpdate}>
-            <div className="form-row">
-              <label htmlFor="editSummary">Summary</label>
-              <input
-                id="editSummary"
-                className="input"
-                value={recordEditForm.summary}
-                onChange={(e) =>
-                  setRecordEditForm((prev) => ({ ...prev, summary: e.target.value }))
-                }
-              />
+          {openPanels.createRecord && (
+            <div className="panel-body" id="panel-create-record">
+              <form className="form" onSubmit={handleRecordCreate}>
+                <div className="form-row">
+                  <label htmlFor="newPetId">Pet ID</label>
+                  <input
+                    id="newPetId"
+                    className="input"
+                    type="number"
+                    min="1"
+                    value={recordForm.pet_id}
+                    onChange={(e) => setRecordForm((prev) => ({ ...prev, pet_id: e.target.value }))}
+                    required
+                  />
+                </div>
+                <div className="form-row">
+                  <label htmlFor="newVetId">Vet ID (optional)</label>
+                  <input
+                    id="newVetId"
+                    className="input"
+                    type="number"
+                    min="1"
+                    value={recordForm.vet_id}
+                    onChange={(e) => setRecordForm((prev) => ({ ...prev, vet_id: e.target.value }))}
+                  />
+                </div>
+                <div className="form-row">
+                  <label htmlFor="newSummary">Summary</label>
+                  <input
+                    id="newSummary"
+                    className="input"
+                    value={recordForm.summary}
+                    onChange={(e) => setRecordForm((prev) => ({ ...prev, summary: e.target.value }))}
+                  />
+                </div>
+                <div className="form-row">
+                  <label htmlFor="newDiagnosis">Diagnosis</label>
+                  <input
+                    id="newDiagnosis"
+                    className="input"
+                    value={recordForm.diagnosis}
+                    onChange={(e) => setRecordForm((prev) => ({ ...prev, diagnosis: e.target.value }))}
+                  />
+                </div>
+                <div className="form-row">
+                  <label htmlFor="newTreatment">Treatment</label>
+                  <input
+                    id="newTreatment"
+                    className="input"
+                    value={recordForm.treatment}
+                    onChange={(e) => setRecordForm((prev) => ({ ...prev, treatment: e.target.value }))}
+                  />
+                </div>
+                <div className="form-row">
+                  <label htmlFor="newNotes">Notes</label>
+                  <textarea
+                    id="newNotes"
+                    className="input"
+                    rows="3"
+                    value={recordForm.notes}
+                    onChange={(e) => setRecordForm((prev) => ({ ...prev, notes: e.target.value }))}
+                  />
+                </div>
+                {recordMessage && <p className="helper">{recordMessage}</p>}
+                <button className="btn primary" type="submit">
+                  Create record
+                </button>
+              </form>
             </div>
-            <div className="form-row">
-              <label htmlFor="editDiagnosis">Diagnosis</label>
-              <input
-                id="editDiagnosis"
-                className="input"
-                value={recordEditForm.diagnosis}
-                onChange={(e) =>
-                  setRecordEditForm((prev) => ({ ...prev, diagnosis: e.target.value }))
-                }
-              />
+          )}
+        </article>
+
+        <article className="panel">
+          <div className="panel-header">
+            <div>
+              <h3>Edit clinical record</h3>
+              <p className="muted">Load a record by ID and update or delete it.</p>
             </div>
-            <div className="form-row">
-              <label htmlFor="editTreatment">Treatment</label>
-              <input
-                id="editTreatment"
-                className="input"
-                value={recordEditForm.treatment}
-                onChange={(e) =>
-                  setRecordEditForm((prev) => ({ ...prev, treatment: e.target.value }))
-                }
-              />
+            <button
+              className="btn secondary small"
+              type="button"
+              onClick={() => togglePanel("editRecord")}
+              aria-expanded={openPanels.editRecord}
+              aria-controls="panel-edit-record"
+            >
+              {openPanels.editRecord ? "Hide" : "Show"}
+            </button>
+          </div>
+
+          {openPanels.editRecord && (
+            <div className="panel-body" id="panel-edit-record">
+              <div className="form-row inline">
+                <label htmlFor="editRecordId">Record ID</label>
+                <input
+                  id="editRecordId"
+                  className="input"
+                  value={recordEditForm.record_id}
+                  onChange={(e) =>
+                    setRecordEditForm((prev) => ({ ...prev, record_id: e.target.value }))
+                  }
+                />
+                <button className="btn secondary" type="button" onClick={handleRecordLookup}>
+                  Load
+                </button>
+              </div>
+
+              <form className="form" onSubmit={handleRecordUpdate}>
+                <div className="form-row">
+                  <label htmlFor="editSummary">Summary</label>
+                  <input
+                    id="editSummary"
+                    className="input"
+                    value={recordEditForm.summary}
+                    onChange={(e) =>
+                      setRecordEditForm((prev) => ({ ...prev, summary: e.target.value }))
+                    }
+                  />
+                </div>
+                <div className="form-row">
+                  <label htmlFor="editDiagnosis">Diagnosis</label>
+                  <input
+                    id="editDiagnosis"
+                    className="input"
+                    value={recordEditForm.diagnosis}
+                    onChange={(e) =>
+                      setRecordEditForm((prev) => ({ ...prev, diagnosis: e.target.value }))
+                    }
+                  />
+                </div>
+                <div className="form-row">
+                  <label htmlFor="editTreatment">Treatment</label>
+                  <input
+                    id="editTreatment"
+                    className="input"
+                    value={recordEditForm.treatment}
+                    onChange={(e) =>
+                      setRecordEditForm((prev) => ({ ...prev, treatment: e.target.value }))
+                    }
+                  />
+                </div>
+                <div className="form-row">
+                  <label htmlFor="editNotes">Notes</label>
+                  <textarea
+                    id="editNotes"
+                    className="input"
+                    rows="3"
+                    value={recordEditForm.notes}
+                    onChange={(e) =>
+                      setRecordEditForm((prev) => ({ ...prev, notes: e.target.value }))
+                    }
+                  />
+                </div>
+                {recordEditMessage && <p className="helper">{recordEditMessage}</p>}
+                <div className="button-row">
+                  <button className="btn primary" type="submit">
+                    Update record
+                  </button>
+                  <button className="btn secondary" type="button" onClick={handleRecordDelete}>
+                    Delete record
+                  </button>
+                </div>
+              </form>
             </div>
-            <div className="form-row">
-              <label htmlFor="editNotes">Notes</label>
-              <textarea
-                id="editNotes"
-                className="input"
-                rows="3"
-                value={recordEditForm.notes}
-                onChange={(e) =>
-                  setRecordEditForm((prev) => ({ ...prev, notes: e.target.value }))
-                }
-              />
-            </div>
-            {recordEditMessage && <p className="helper">{recordEditMessage}</p>}
-            <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-              <button className="btn primary" type="submit">
-                Update record
-              </button>
-              <button className="btn secondary" type="button" onClick={handleRecordDelete}>
-                Delete record
-              </button>
-            </div>
-          </form>
+          )}
         </article>
       </section>
     </main>

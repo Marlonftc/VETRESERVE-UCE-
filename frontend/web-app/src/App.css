@@ -173,6 +173,11 @@ select:focus {
   border: 1px solid rgba(93, 80, 70, 0.2);
 }
 
+.btn.small {
+  padding: 8px 14px;
+  font-size: 0.9rem;
+}
+
 .btn:hover {
   transform: translateY(-1px);
 }
@@ -199,6 +204,72 @@ select:focus {
   margin-bottom: 24px;
 }
 
+.dashboard-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.action-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.action-card {
+  border: 1px solid rgba(93, 80, 70, 0.2);
+  background: var(--card);
+  border-radius: 16px;
+  padding: 14px;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 12px;
+  align-items: center;
+  text-align: left;
+  cursor: pointer;
+  box-shadow: var(--shadow);
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.action-card:hover {
+  transform: translateY(-1px);
+  border-color: rgba(47, 127, 181, 0.4);
+}
+
+.action-card.active {
+  border-color: var(--brand-500);
+  box-shadow: 0 16px 32px rgba(47, 127, 181, 0.2);
+}
+
+.action-card h4 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.action-card p {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.action-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, rgba(90, 174, 214, 0.2), rgba(90, 174, 214, 0.45));
+  color: var(--brand-700);
+  box-shadow: inset 0 0 0 1px rgba(47, 127, 181, 0.2);
+}
+
+.action-icon svg {
+  width: 22px;
+  height: 22px;
+  stroke: currentColor;
+}
+
 .badge {
   background: var(--sky-200);
   color: var(--ink-700);
@@ -212,8 +283,9 @@ select:focus {
 
 .panel-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 20px;
+  align-items: start;
 }
 
 .panel {
@@ -222,6 +294,33 @@ select:focus {
   padding: 18px;
   border: 1px solid rgba(210, 179, 150, 0.4);
   box-shadow: var(--shadow);
+  display: grid;
+  gap: 14px;
+  align-content: start;
+}
+
+.panel-header {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.panel-header h3,
+.panel-header p {
+  margin: 0;
+}
+
+.panel-body {
+  display: grid;
+  gap: 14px;
+}
+
+.panel .list + .form,
+.panel .form + .list {
+  margin-top: 6px;
+  padding-top: 10px;
+  border-top: 1px dashed rgba(93, 80, 70, 0.2);
 }
 
 .list {
@@ -242,6 +341,21 @@ select:focus {
 
 .muted {
   color: var(--ink-500);
+}
+
+.form-row.inline {
+  grid-template-columns: 1fr auto;
+  align-items: end;
+}
+
+.form-row.inline label {
+  grid-column: 1 / -1;
+}
+
+.button-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
 @keyframes page-fade {
