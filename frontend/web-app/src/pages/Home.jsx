@@ -3,13 +3,7 @@ import { useAuth } from "../context/AuthContext";
 import { listOwners, createOwner } from "../services/ownerService";
 import { listPetsByOwner, createPet } from "../services/petService";
 import { createAppointment } from "../services/appointmentService";
-import {
-  listRecordsByPet,
-  createRecord,
-  updateRecord,
-  deleteRecord,
-  getRecordById,
-} from "../services/clinicalService";
+import { getActiveVets } from "../services/userService";
 
 export default function Home() {
   const { user, token, logout } = useAuth();
@@ -21,11 +15,9 @@ export default function Home() {
   const [petsLoading, setPetsLoading] = useState(false);
   const [petsError, setPetsError] = useState(null);
   const [appointmentMessage, setAppointmentMessage] = useState(null);
-  const [records, setRecords] = useState([]);
-  const [recordsLoading, setRecordsLoading] = useState(false);
-  const [recordsError, setRecordsError] = useState(null);
-  const [recordMessage, setRecordMessage] = useState(null);
-  const [recordEditMessage, setRecordEditMessage] = useState(null);
+  const [vets, setVets] = useState([]);
+  const [vetsLoading, setVetsLoading] = useState(false);
+  const [vetsError, setVetsError] = useState(null);
   const [activeSection, setActiveSection] = useState("");
 
   const [ownerForm, setOwnerForm] = useState({
@@ -50,24 +42,6 @@ export default function Home() {
     end_time: "",
   });
 
-  const [recordsPetId, setRecordsPetId] = useState("");
-
-  const [recordForm, setRecordForm] = useState({
-    pet_id: "",
-    vet_id: "",
-    summary: "",
-    diagnosis: "",
-    treatment: "",
-    notes: "",
-  });
-
-  const [recordEditForm, setRecordEditForm] = useState({
-    record_id: "",
-    summary: "",
-    diagnosis: "",
-    treatment: "",
-    notes: "",
-  });
 
   useEffect(() => {
     if (!token) return;
@@ -82,6 +56,17 @@ export default function Home() {
       })
       .finally(() => setOwnersLoading(false));
   }, [token]);
+
+  useEffect(() => {
+    if (!token || !user) return;
+    if (user.role !== "CLIENT") return;
+    setVetsLoading(true);
+    setVetsError(null);
+    getActiveVets(token)
+      .then((data) => setVets(data))
+      .catch((err) => setVetsError(err.message))
+      .finally(() => setVetsLoading(false));
+  }, [token, user]);
 
   const handleOwnerCreate = async (e) => {
     e.preventDefault();
@@ -179,93 +164,6 @@ export default function Home() {
     }
   };
 
-  const handleRecordsFetch = async (e) => {
-    e.preventDefault();
-    setRecords([]);
-    setRecordsError(null);
-    if (!recordsPetId) return;
-    setRecordsLoading(true);
-    try {
-      const data = await listRecordsByPet(recordsPetId);
-      setRecords(data);
-    } catch (err) {
-      setRecordsError(err.message);
-    } finally {
-      setRecordsLoading(false);
-    }
-  };
-
-  const handleRecordCreate = async (e) => {
-    e.preventDefault();
-    setRecordMessage(null);
-    try {
-      const payload = {
-        ...recordForm,
-        pet_id: Number(recordForm.pet_id),
-        vet_id: recordForm.vet_id ? Number(recordForm.vet_id) : null,
-      };
-      const created = await createRecord(payload);
-      setRecordMessage("Clinical record created.");
-      setRecords((prev) => [created, ...prev]);
-      setRecordForm({
-        pet_id: "",
-        vet_id: "",
-        summary: "",
-        diagnosis: "",
-        treatment: "",
-        notes: "",
-      });
-    } catch (err) {
-      setRecordMessage(err.message);
-    }
-  };
-
-  const handleRecordLookup = async () => {
-    setRecordEditMessage(null);
-    if (!recordEditForm.record_id) return;
-    try {
-      const record = await getRecordById(recordEditForm.record_id);
-      setRecordEditForm((prev) => ({
-        ...prev,
-        summary: record.summary || "",
-        diagnosis: record.diagnosis || "",
-        treatment: record.treatment || "",
-        notes: record.notes || "",
-      }));
-    } catch (err) {
-      setRecordEditMessage(err.message);
-    }
-  };
-
-  const handleRecordUpdate = async (e) => {
-    e.preventDefault();
-    setRecordEditMessage(null);
-    try {
-      const updated = await updateRecord(recordEditForm.record_id, {
-        summary: recordEditForm.summary || null,
-        diagnosis: recordEditForm.diagnosis || null,
-        treatment: recordEditForm.treatment || null,
-        notes: recordEditForm.notes || null,
-      });
-      setRecordEditMessage("Clinical record updated.");
-      setRecords((prev) => prev.map((item) => (item.id === updated.id ? updated : item)));
-    } catch (err) {
-      setRecordEditMessage(err.message);
-    }
-  };
-
-  const handleRecordDelete = async () => {
-    setRecordEditMessage(null);
-    if (!recordEditForm.record_id) return;
-    try {
-      await deleteRecord(recordEditForm.record_id);
-      setRecordEditMessage("Clinical record deleted.");
-      setRecords((prev) => prev.filter((item) => item.id !== recordEditForm.record_id));
-      setRecordEditForm({ record_id: "", summary: "", diagnosis: "", treatment: "", notes: "" });
-    } catch (err) {
-      setRecordEditMessage(err.message);
-    }
-  };
 
   const actionCards = [
     {
@@ -303,40 +201,6 @@ export default function Home() {
         <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.8">
           <rect x="3" y="5" width="18" height="16" rx="2"></rect>
           <path d="M7 3v4M17 3v4M3 10h18"></path>
-        </svg>
-      ),
-    },
-    {
-      key: "records",
-      title: "Clinical records",
-      description: "Search by pet ID.",
-      icon: (
-        <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.8">
-          <path d="M7 3h7l5 5v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z"></path>
-          <path d="M14 3v6h6"></path>
-        </svg>
-      ),
-    },
-    {
-      key: "createRecord",
-      title: "New record",
-      description: "Add a clinical record.",
-      icon: (
-        <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.8">
-          <path d="M7 3h7l5 5v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z"></path>
-          <path d="M14 3v6h6"></path>
-          <path d="M12 12v6M9 15h6"></path>
-        </svg>
-      ),
-    },
-    {
-      key: "editRecord",
-      title: "Edit record",
-      description: "Update or delete.",
-      icon: (
-        <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.8">
-          <path d="M4 20h4l11-11a2.2 2.2 0 0 0-4-4L4 16v4Z"></path>
-          <path d="M13 6l4 4"></path>
         </svg>
       ),
     },
@@ -580,18 +444,27 @@ export default function Home() {
 
                 <form className="form" onSubmit={handleAppointmentCreate}>
                   <div className="form-row">
-                    <label htmlFor="vetId">Vet ID</label>
-                    <input
-                      id="vetId"
-                      className="input"
-                      type="number"
-                      min="1"
+                    <label htmlFor="vetSelect">Veterinarian</label>
+                    <select
+                      id="vetSelect"
                       value={appointmentForm.vet_id}
                       onChange={(e) =>
                         setAppointmentForm((prev) => ({ ...prev, vet_id: e.target.value }))
                       }
                       required
-                    />
+                    >
+                      <option value="">Select veterinarian</option>
+                      {vets.map((vet) => (
+                        <option key={vet.id} value={vet.id}>
+                          {vet.email}
+                        </option>
+                      ))}
+                    </select>
+                    {vetsLoading && <p className="muted">Loading veterinarians...</p>}
+                    {vetsError && <div className="error">{vetsError}</div>}
+                    {!vetsLoading && vets.length === 0 && !vetsError && (
+                      <p className="muted">No approved veterinarians available.</p>
+                    )}
                   </div>
                   <div className="form-row">
                     <label htmlFor="appointmentDay">Day</label>
@@ -640,222 +513,6 @@ export default function Home() {
               </>
             )}
 
-            {activeSection === "records" && (
-              <>
-                <div className="section-header">
-                  <div>
-                    <h4>Clinical records</h4>
-                    <p className="muted">Search records by pet ID.</p>
-                  </div>
-                </div>
-
-                <form className="form" onSubmit={handleRecordsFetch}>
-                  <div className="form-row">
-                    <label htmlFor="recordPetId">Pet ID</label>
-                    <input
-                      id="recordPetId"
-                      className="input"
-                      type="number"
-                      min="1"
-                      value={recordsPetId}
-                      onChange={(e) => setRecordsPetId(e.target.value)}
-                      required
-                    />
-                  </div>
-                  <button className="btn primary" type="submit">
-                    Load records
-                  </button>
-                </form>
-
-                {recordsLoading && <p className="muted">Loading records...</p>}
-                {recordsError && <div className="error">{recordsError}</div>}
-
-                <div className="list">
-                  {records.map((record) => (
-                    <div key={record.id} className="list-item">
-                      <div>
-                        <strong>{record.diagnosis || "Clinical record"}</strong>
-                        <div className="muted">{record.summary || "No summary provided."}</div>
-                      </div>
-                      <span className="badge">{record.created_at?.slice(0, 10) || "n/a"}</span>
-                    </div>
-                  ))}
-                </div>
-              </>
-            )}
-
-            {activeSection === "createRecord" && (
-              <>
-                <div className="section-header">
-                  <div>
-                    <h4>Create clinical record</h4>
-                    <p className="muted">Add a new record for a pet.</p>
-                  </div>
-                </div>
-
-                <form className="form" onSubmit={handleRecordCreate}>
-                  <div className="form-row">
-                    <label htmlFor="newPetId">Pet ID</label>
-                    <input
-                      id="newPetId"
-                      className="input"
-                      type="number"
-                      min="1"
-                      value={recordForm.pet_id}
-                      onChange={(e) =>
-                        setRecordForm((prev) => ({ ...prev, pet_id: e.target.value }))
-                      }
-                      required
-                    />
-                  </div>
-                  <div className="form-row">
-                    <label htmlFor="newVetId">Vet ID (optional)</label>
-                    <input
-                      id="newVetId"
-                      className="input"
-                      type="number"
-                      min="1"
-                      value={recordForm.vet_id}
-                      onChange={(e) =>
-                        setRecordForm((prev) => ({ ...prev, vet_id: e.target.value }))
-                      }
-                    />
-                  </div>
-                  <div className="form-row">
-                    <label htmlFor="newSummary">Summary</label>
-                    <input
-                      id="newSummary"
-                      className="input"
-                      value={recordForm.summary}
-                      onChange={(e) =>
-                        setRecordForm((prev) => ({ ...prev, summary: e.target.value }))
-                      }
-                    />
-                  </div>
-                  <div className="form-row">
-                    <label htmlFor="newDiagnosis">Diagnosis</label>
-                    <input
-                      id="newDiagnosis"
-                      className="input"
-                      value={recordForm.diagnosis}
-                      onChange={(e) =>
-                        setRecordForm((prev) => ({ ...prev, diagnosis: e.target.value }))
-                      }
-                    />
-                  </div>
-                  <div className="form-row">
-                    <label htmlFor="newTreatment">Treatment</label>
-                    <input
-                      id="newTreatment"
-                      className="input"
-                      value={recordForm.treatment}
-                      onChange={(e) =>
-                        setRecordForm((prev) => ({ ...prev, treatment: e.target.value }))
-                      }
-                    />
-                  </div>
-                  <div className="form-row">
-                    <label htmlFor="newNotes">Notes</label>
-                    <textarea
-                      id="newNotes"
-                      className="input"
-                      rows="3"
-                      value={recordForm.notes}
-                      onChange={(e) =>
-                        setRecordForm((prev) => ({ ...prev, notes: e.target.value }))
-                      }
-                    />
-                  </div>
-                  {recordMessage && <p className="helper">{recordMessage}</p>}
-                  <button className="btn primary" type="submit">
-                    Create record
-                  </button>
-                </form>
-              </>
-            )}
-
-            {activeSection === "editRecord" && (
-              <>
-                <div className="section-header">
-                  <div>
-                    <h4>Edit clinical record</h4>
-                    <p className="muted">Load a record by ID and update or delete it.</p>
-                  </div>
-                </div>
-
-                <div className="form-row inline">
-                  <label htmlFor="editRecordId">Record ID</label>
-                  <input
-                    id="editRecordId"
-                    className="input"
-                    value={recordEditForm.record_id}
-                    onChange={(e) =>
-                      setRecordEditForm((prev) => ({ ...prev, record_id: e.target.value }))
-                    }
-                  />
-                  <button className="btn secondary" type="button" onClick={handleRecordLookup}>
-                    Load
-                  </button>
-                </div>
-
-                <form className="form" onSubmit={handleRecordUpdate}>
-                  <div className="form-row">
-                    <label htmlFor="editSummary">Summary</label>
-                    <input
-                      id="editSummary"
-                      className="input"
-                      value={recordEditForm.summary}
-                      onChange={(e) =>
-                        setRecordEditForm((prev) => ({ ...prev, summary: e.target.value }))
-                      }
-                    />
-                  </div>
-                  <div className="form-row">
-                    <label htmlFor="editDiagnosis">Diagnosis</label>
-                    <input
-                      id="editDiagnosis"
-                      className="input"
-                      value={recordEditForm.diagnosis}
-                      onChange={(e) =>
-                        setRecordEditForm((prev) => ({ ...prev, diagnosis: e.target.value }))
-                      }
-                    />
-                  </div>
-                  <div className="form-row">
-                    <label htmlFor="editTreatment">Treatment</label>
-                    <input
-                      id="editTreatment"
-                      className="input"
-                      value={recordEditForm.treatment}
-                      onChange={(e) =>
-                        setRecordEditForm((prev) => ({ ...prev, treatment: e.target.value }))
-                      }
-                    />
-                  </div>
-                  <div className="form-row">
-                    <label htmlFor="editNotes">Notes</label>
-                    <textarea
-                      id="editNotes"
-                      className="input"
-                      rows="3"
-                      value={recordEditForm.notes}
-                      onChange={(e) =>
-                        setRecordEditForm((prev) => ({ ...prev, notes: e.target.value }))
-                      }
-                    />
-                  </div>
-                  {recordEditMessage && <p className="helper">{recordEditMessage}</p>}
-                  <div className="button-row">
-                    <button className="btn primary" type="submit">
-                      Update record
-                    </button>
-                    <button className="btn secondary" type="button" onClick={handleRecordDelete}>
-                      Delete record
-                    </button>
-                  </div>
-                </form>
-              </>
-            )}
           </div>
         </section>
       )}

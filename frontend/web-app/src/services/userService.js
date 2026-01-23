@@ -33,6 +33,20 @@ export async function getPendingVets(token) {
   return res.json();
 }
 
+export async function getActiveVets(token) {
+  const res = await fetch(`${USER_SERVICE_URL}/vets/active`, {
+    headers: {
+      ...authHeaders(token),
+    },
+  });
+
+  if (!res.ok) {
+    throw new Error("Failed to fetch vets");
+  }
+
+  return res.json();
+}
+
 export async function approveVet(id, token) {
   const res = await fetch(`${USER_SERVICE_URL}/${id}/approve`, {
     method: "PUT",

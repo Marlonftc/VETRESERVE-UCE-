@@ -28,6 +28,14 @@ def get_pending_vets(db: Session):
     ).all()
 
 
+# ✅ GET ACTIVE VETS
+def get_active_vets(db: Session):
+    return db.query(User).filter(
+        User.role == "VET",
+        User.status == "ACTIVE"
+    ).all()
+
+
 # ✅ APPROVE USER
 def approve_user(db: Session, user_id: int):
     user = db.query(User).filter(User.id == user_id).first()
