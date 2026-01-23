@@ -218,14 +218,7 @@ export default function VetHome() {
         <div className="admin-content">
           {activeSection === "appointments" && (
             <>
-              <div className="panel-title">
-                <span className="action-icon" aria-hidden="true">
-                  <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.8">
-                    <circle cx="8" cy="8" r="3"></circle>
-                    <path d="M3.5 19a4.5 4.5 0 0 1 9 0"></path>
-                    <path d="M13 7h8M13 11h6"></path>
-                  </svg>
-                </span>
+              <div className="section-header">
                 <div>
                   <h4>Assigned cases</h4>
                   <p className="muted">Review your scheduled appointments.</p>
@@ -259,13 +252,7 @@ export default function VetHome() {
 
           {activeSection === "availability" && (
             <>
-              <div className="panel-title">
-                <span className="action-icon" aria-hidden="true">
-                  <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.8">
-                    <rect x="3" y="5" width="18" height="16" rx="2"></rect>
-                    <path d="M7 3v4M17 3v4M3 10h18"></path>
-                  </svg>
-                </span>
+              <div className="section-header">
                 <div>
                   <h4>Availability</h4>
                   <p className="muted">Set your available hours for clients.</p>
@@ -320,13 +307,7 @@ export default function VetHome() {
 
           {activeSection === "records" && (
             <>
-              <div className="panel-title">
-                <span className="action-icon" aria-hidden="true">
-                  <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.8">
-                    <path d="M7 3h7l5 5v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z"></path>
-                    <path d="M14 3v6h6"></path>
-                  </svg>
-                </span>
+              <div className="section-header">
                 <div>
                   <h4>Clinical records</h4>
                   <p className="muted">Search, create, update, or delete records.</p>

@@ -316,6 +316,13 @@ select:focus {
   flex: 0 0 auto;
 }
 
+.section-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
 .admin-tabs {
   display: flex;
   flex-wrap: wrap;
