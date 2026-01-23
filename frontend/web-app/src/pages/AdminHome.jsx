@@ -3,7 +3,7 @@ import { getPendingVets, approveVet } from "../services/userService";
 import { useAuth } from "../context/AuthContext";
 
 export default function AdminHome() {
-  const { token } = useAuth();
+  const { token, logout, user } = useAuth();
   const [vets, setVets] = useState([]);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -14,7 +14,7 @@ export default function AdminHome() {
       setVets(data);
     } catch (err) {
       console.error(err);
-      setError("Failed to load pending vets");
+      setError("Could not load pending students.");
     } finally {
       setLoading(false);
     }
@@ -26,7 +26,7 @@ export default function AdminHome() {
       setVets((prev) => prev.filter((v) => v.id !== id));
     } catch (err) {
       console.error(err);
-      setError("Failed to approve vet");
+      setError("Could not approve the student.");
     }
   };
 
@@ -37,19 +37,40 @@ export default function AdminHome() {
   }, [token]);
 
   return (
-    <div>
-      <h2>Pending Vets</h2>
-
-      {loading && <p>Loading...</p>}
-      {error && <p style={{ color: "red" }}>{error}</p>}
-      {!loading && vets.length === 0 && <p>No pending vets</p>}
-
-      {vets.map((v) => (
-        <div key={v.id}>
-          <span>{v.email}</span>
-          <button onClick={() => approve(v.id)}>Approve</button>
+    <main className="page">
+      <header className="dashboard-header">
+        <div>
+          <span className="eyebrow">Admin panel</span>
+          <h1>Approval center</h1>
+          <p className="muted">Manage requests and enable new profiles.</p>
         </div>
-      ))}
-    </div>
+        <div>
+          <span className="badge">{user?.email}</span>{" "}
+          <button className="btn secondary" onClick={logout}>
+            Sign out
+          </button>
+        </div>
+      </header>
+
+      <section className="panel">
+        <h3>Pending requests</h3>
+        <p className="muted">Review and approve veterinary students.</p>
+
+        {loading && <p className="muted">Loading requests...</p>}
+        {error && <div className="error">{error}</div>}
+        {!loading && vets.length === 0 && <p className="muted">No pending requests.</p>}
+
+        <div className="list">
+          {vets.map((v) => (
+            <div key={v.id} className="list-item">
+              <span>{v.email}</span>
+              <button className="btn primary" onClick={() => approve(v.id)}>
+                Approve
+              </button>
+            </div>
+          ))}
+        </div>
+      </section>
+    </main>
   );
 }

@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { AuthProvider, useAuth } from "./context/AuthContext";
+import { useAuth } from "./context/AuthContext";
 
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -31,56 +31,54 @@ function ProtectedRoute({ children, role, status }) {
 
 export default function App() {
   return (
-    <AuthProvider>
-      <BrowserRouter>
-        <Routes>
-          {/* Public routes */}
-          <Route path="/" element={<Login />} />
-          <Route path="/register" element={<Register />} />
+    <BrowserRouter>
+      <Routes>
+        {/* Public routes */}
+        <Route path="/" element={<Login />} />
+        <Route path="/register" element={<Register />} />
 
-          {/* Client routes */}
-          <Route
-            path="/home"
-            element={
-              <ProtectedRoute role="CLIENT">
-                <Home />
-              </ProtectedRoute>
-            }
-          />
+        {/* Client routes */}
+        <Route
+          path="/home"
+          element={
+            <ProtectedRoute role="CLIENT">
+              <Home />
+            </ProtectedRoute>
+          }
+        />
 
-          {/* Admin routes */}
-          <Route
-            path="/admin"
-            element={
-              <ProtectedRoute role="ADMIN">
-                <AdminHome />
-              </ProtectedRoute>
-            }
-          />
+        {/* Admin routes */}
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute role="ADMIN">
+              <AdminHome />
+            </ProtectedRoute>
+          }
+        />
 
-          {/* Vet routes */}
-          <Route
-            path="/vet"
-            element={
-              <ProtectedRoute role="VET" status="ACTIVE">
-                <VetHome />
-              </ProtectedRoute>
-            }
-          />
+        {/* Vet routes */}
+        <Route
+          path="/vet"
+          element={
+            <ProtectedRoute role="VET" status="ACTIVE">
+              <VetHome />
+            </ProtectedRoute>
+          }
+        />
 
-          <Route
-            path="/vet/pending"
-            element={
-              <ProtectedRoute role="VET">
-                <VetPending />
-              </ProtectedRoute>
-            }
-          />
+        <Route
+          path="/vet/pending"
+          element={
+            <ProtectedRoute role="VET">
+              <VetPending />
+            </ProtectedRoute>
+          }
+        />
 
-          {/* Fallback */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </BrowserRouter>
-    </AuthProvider>
+        {/* Fallback */}
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </BrowserRouter>
   );
 }

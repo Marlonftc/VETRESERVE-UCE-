@@ -1,11 +1,14 @@
 export default function VetPending() {
   return (
-    <div style={{ padding: 32 }}>
-      <h2>Account pending approval</h2>
-      <p>
-        Your veterinarian account is waiting for admin approval.
-        You will be able to access the system once it is approved.
-      </p>
-    </div>
+    <main className="page">
+      <section className="panel">
+        <span className="badge">Under review</span>
+        <h2>Your account is pending approval</h2>
+        <p>
+          The admin team is reviewing your request. We will notify you once your profile is active
+          and you can access the system.
+        </p>
+      </section>
+    </main>
   );
 }

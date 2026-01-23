@@ -1,5 +1,7 @@
+import { API_BASE } from "./apiConfig";
+
 export async function loginRequest(email, password) {
-  const res = await fetch("http://127.0.0.1:8000/auth/login", {
+  const res = await fetch(`${API_BASE}/api/auth/login`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -16,7 +18,7 @@ export async function loginRequest(email, password) {
 }
 
 export async function getMe(token) {
-  const res = await fetch("http://127.0.0.1:8000/auth/me", {
+  const res = await fetch(`${API_BASE}/api/auth/me`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },

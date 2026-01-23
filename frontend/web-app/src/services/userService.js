@@ -1,6 +1,7 @@
-const USER_SERVICE_URL = "http://127.0.0.1:8001/users";
+import { API_BASE, authHeaders } from "./apiConfig";
 
-/* ✅ REGISTER USER (CLIENT / VET) */
+const USER_SERVICE_URL = `${API_BASE}/api/users`;
+
 export async function registerUser(data) {
   const res = await fetch(`${USER_SERVICE_URL}/register`, {
     method: "POST",
@@ -18,12 +19,10 @@ export async function registerUser(data) {
   return res.json();
 }
 
-/* ✅ GET PENDING VETS (ADMIN) */
 export async function getPendingVets(token) {
   const res = await fetch(`${USER_SERVICE_URL}/vets/pending`, {
     headers: {
-      Authorization: `Bearer ${token}`,
-      "X-Role": "ADMIN", // 🔥 OBLIGATORIO
+      ...authHeaders(token),
     },
   });
 
@@ -34,13 +33,11 @@ export async function getPendingVets(token) {
   return res.json();
 }
 
-/* ✅ APPROVE VET (ADMIN) */
 export async function approveVet(id, token) {
   const res = await fetch(`${USER_SERVICE_URL}/${id}/approve`, {
     method: "PUT",
     headers: {
-      Authorization: `Bearer ${token}`,
-      "X-Role": "ADMIN", // 🔥 OBLIGATORIO
+      ...authHeaders(token),
     },
   });
 
