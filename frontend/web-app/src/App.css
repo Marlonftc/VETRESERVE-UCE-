@@ -306,6 +306,57 @@ select:focus {
   justify-content: space-between;
 }
 
+.panel-title {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.panel-title .action-icon {
+  flex: 0 0 auto;
+}
+
+.admin-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 8px 0 14px;
+}
+
+.admin-filter {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  align-items: end;
+}
+
+.admin-tab {
+  border: 1px solid rgba(93, 80, 70, 0.2);
+  background: rgba(255, 255, 255, 0.9);
+  padding: 8px 14px;
+  border-radius: 999px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
+}
+
+.admin-tab.active {
+  background: var(--brand-500);
+  border-color: var(--brand-500);
+  color: #fff;
+}
+
+.admin-content {
+  display: grid;
+  gap: 16px;
+}
+
+.admin-split {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
+
 .panel-header h3,
 .panel-header p {
   margin: 0;
