@@ -55,6 +55,27 @@ def create(
 
 
 # ==========================
+# CLIENT/VET AVAILABILITY VIEW
+# ==========================
+@router.get("/availability", response_model=list[ScheduleResponse])
+def availability(
+    vet_id: int,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Public (authenticated) availability view for clients/vets/admins.
+    """
+    if current_user.get("role") not in ["CLIENT", "VET", "ADMIN"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Insufficient permissions"
+        )
+
+    return get_availability(db=db, vet_id=vet_id)
+
+
+# ==========================
 # INTERNAL AVAILABILITY CHECK
 # ==========================
 @router.get(

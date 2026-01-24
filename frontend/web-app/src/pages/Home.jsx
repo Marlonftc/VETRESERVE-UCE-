@@ -3,6 +3,7 @@ import { useAuth } from "../context/AuthContext";
 import { listOwners, createOwner } from "../services/ownerService";
 import { listPetsByOwner, createPet } from "../services/petService";
 import { createAppointment } from "../services/appointmentService";
+import { getVetAvailability } from "../services/scheduleService";
 import { getActiveVets } from "../services/userService";
 
 export default function Home() {
@@ -15,6 +16,9 @@ export default function Home() {
   const [petsLoading, setPetsLoading] = useState(false);
   const [petsError, setPetsError] = useState(null);
   const [appointmentMessage, setAppointmentMessage] = useState(null);
+  const [availability, setAvailability] = useState([]);
+  const [availabilityLoading, setAvailabilityLoading] = useState(false);
+  const [availabilityError, setAvailabilityError] = useState(null);
   const [vets, setVets] = useState([]);
   const [vetsLoading, setVetsLoading] = useState(false);
   const [vetsError, setVetsError] = useState(null);
@@ -56,6 +60,20 @@ export default function Home() {
       })
       .finally(() => setOwnersLoading(false));
   }, [token]);
+
+  useEffect(() => {
+    if (!token || !appointmentForm.vet_id) {
+      setAvailability([]);
+      setAvailabilityError(null);
+      return;
+    }
+    setAvailabilityLoading(true);
+    setAvailabilityError(null);
+    getVetAvailability(appointmentForm.vet_id, token)
+      .then((data) => setAvailability(data))
+      .catch((err) => setAvailabilityError(err.message))
+      .finally(() => setAvailabilityLoading(false));
+  }, [appointmentForm.vet_id, token]);
 
   useEffect(() => {
     if (!token || !user) return;
@@ -466,6 +484,45 @@ export default function Home() {
                       <p className="muted">No approved veterinarians available.</p>
                     )}
                   </div>
+                  {appointmentForm.vet_id && (
+                    <div className="form-row">
+                      <label>Available hours</label>
+                      {(() => {
+                        const visibleAvailability = appointmentForm.day
+                          ? availability.filter((slot) => slot.day === appointmentForm.day)
+                          : availability;
+
+                        return (
+                          <>
+                            {availabilityLoading && <p className="muted">Loading availability...</p>}
+                            {availabilityError && <div className="error">{availabilityError}</div>}
+                            {!availabilityLoading && !availabilityError && visibleAvailability.length === 0 && (
+                              <p className="muted">No availability found for this veterinarian.</p>
+                            )}
+                            {!availabilityLoading && visibleAvailability.length > 0 && (
+                              <div className="list">
+                                {visibleAvailability.map((slot, index) => (
+                                  <div
+                                    key={`${slot.day}-${slot.start_time}-${index}`}
+                                    className="list-item"
+                                  >
+                                    <div>
+                                      <strong>{slot.day}</strong>
+                                      <div className="muted">
+                                        {String(slot.start_time).slice(0, 5)} -{" "}
+                                        {String(slot.end_time).slice(0, 5)}
+                                      </div>
+                                    </div>
+                                    <span className="badge">Available</span>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </>
+                        );
+                      })()}
+                    </div>
+                  )}
                   <div className="form-row">
                     <label htmlFor="appointmentDay">Day</label>
                     <input
